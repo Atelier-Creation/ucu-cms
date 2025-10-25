@@ -17,11 +17,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { Trash2, Edit2, Plus, ChevronRight } from "lucide-react";
+import { Trash2, Edit2, Plus, PanelsTopLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import bannerImage from "@/assets/banner1.jpeg"; // adjust your path
+import bannerImage from "@/assets/banner1.jpeg";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
-// --- Initial Hero Data (converted to plain strings for localStorage) ---
+// --- Initial Hero Data ---
 const heroData = [
   {
     header: `Guided by Industry & <span class="text-green-500">Academic</span> Icons`,
@@ -36,31 +44,6 @@ const heroData = [
   {
     header: `<span class="text-green-500">Business Advisory</span> Council`,
     para: `Our Business Advisory Council (BAC) anchors UCU’s strategic vision—shaping curriculum, guiding long-term direction, and ensuring every program delivers tangible career value from day one.`,
-    image: bannerImage,
-  },
-  {
-    header: `<span class="text-green-500">Academic Advisory</span> Council`,
-    para: `UCU’s Academic Advisory Council (AAC) strengthens our intellectual core—shaping curriculum, deepening academic rigor, and laying the foundation of business knowledge to nurture future leaders.`,
-    image: bannerImage,
-  },
-  {
-    header: `<span class="text-green-500">CHRO Advisory</span> Council`,
-    para: `UCU’s CHRO Advisory Council brings strategic HR minds together to shape talent frameworks, leadership readiness, and workforce evolution—ensuring our programs mirror the priorities of enterprise people strategy.`,
-    image: bannerImage,
-  },
-  {
-    header: `<span class="text-green-500">Talent Acquisition</span> Council`,
-    para: `UCU’s Talent Acquisition Council draws on frontline recruitment expertise to align hiring realities with learner outcomes—crafting career pathways that meet the pulse of industry demand.`,
-    image: bannerImage,
-  },
-  {
-    header: `<span class="text-green-500">L&D Advisory</span> Council`,
-    para: `UCU’s L&D Advisory Council collaborates with learning leaders to refine instructional design, enhance learner engagement, and embed growth mindsets into every stage of professional development.`,
-    image: bannerImage,
-  },
-  {
-    header: `<span class="text-green-500">Young CXO</span> Council`,
-    para: `UCU’s Young CXO Council (YCC) connects tomorrow’s talent with today’s trailblazing leaders—driving measurable corporate impact and channeling boardroom insights directly into our classrooms.`,
     image: bannerImage,
   },
 ];
@@ -159,12 +142,31 @@ export default function HeroSlidesPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* ✅ Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/pages/home/none">
+            <PanelsTopLeft className="w-4 h-4 inline-block mr-1" />
+              Pages
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/pages/home">Home Page</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Hero Slides</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <h1 className="text-3xl font-bold">
-        HomePage <ChevronRight className="inline-block" /> Hero Slides
-        Management
+        Hero Slides Management
       </h1>
 
-      {/* Add Slide Button */}
+      {/* Add Slide Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button variant="secondary" className="mb-4 flex items-center gap-2">
@@ -236,7 +238,7 @@ export default function HeroSlidesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Header</TableHead>
+              <TableHead>Sections</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Image</TableHead>
               <TableHead>Actions</TableHead>
@@ -251,7 +253,10 @@ export default function HeroSlidesPage() {
                     className="font-medium"
                   />
                 </TableCell>
-                <TableCell className="max-w-[200px] truncate" title={slide.description}>
+                <TableCell
+                  className="max-w-[200px] truncate"
+                  title={slide.description}
+                >
                   {slide.description}
                 </TableCell>
 
