@@ -83,6 +83,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                           <Link
                             key={sub.to}
                             to={sub.to}
+                            onClick={() => setMobileOpen(false)}
                             className={cn(
                               "flex items-center py-2 text-sm text-gray-700 hover:text-orange-700 capitalize transition",
                               isSubActive && "font-semibold text-orange-800"
@@ -110,7 +111,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                     "bg-orange-50 text-orange-800 hover:bg-gray-200 hover:text-gray-900"
                 )}
               >
-                <Link to={link.to} className="flex items-center">
+                <Link to={link.to} onClick={() => setMobileOpen(false)} className="flex items-center">
                   <Icon className="h-4 w-4" />
                   {link.label}
                 </Link>

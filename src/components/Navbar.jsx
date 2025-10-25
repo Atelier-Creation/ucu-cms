@@ -1,19 +1,12 @@
 import { useEffect, useState } from "react";
-import { Bell, Menu, X, User, Moon, Sun } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Bell, Menu, User, Moon, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
-export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
+export default function Navbar({ setMobileOpen }) {
   const [isDark, setIsDark] = useState(false);
+
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
@@ -25,32 +18,17 @@ export default function Navbar() {
 
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-background border-b">
-      {/* Left section - logo / menu */}
+      {/* Left section - mobile menu & logo */}
       <div className="flex items-center gap-3">
-        {/* Mobile Menu */}
-        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <SheetHeader className="p-4 border-b">
-              <SheetTitle>Menu</SheetTitle>
-            </SheetHeader>
-            <nav className="flex flex-col p-4 space-y-2">
-              <Button variant="ghost" className="justify-start">
-                Dashboard
-              </Button>
-              <Button variant="ghost" className="justify-start">
-                Users
-              </Button>
-              <Button variant="ghost" className="justify-start">
-                Settings
-              </Button>
-            </nav>
-          </SheetContent>
-        </Sheet>
+        {/* Mobile Menu Button triggers AdminLayout's state */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setMobileOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
 
         <h1 className="text-xl font-bold text-foreground">Admin Dashboard</h1>
       </div>
@@ -60,7 +38,7 @@ export default function Navbar() {
         <Input type="text" placeholder="Search..." className="w-full" />
       </div>
 
-      {/* Right section - notifications & user */}
+      {/* Right section - notifications, theme toggle, user */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
