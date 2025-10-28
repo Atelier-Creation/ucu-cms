@@ -31,7 +31,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/use-toast";
-import { DatePicker } from "./ui/DatePicker";
+import { DatePicker } from "../components/ui/DatePicker";
 
 const UpcomingEventsPage = () => {
   const { toast } = useToast();

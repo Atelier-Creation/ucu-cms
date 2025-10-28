@@ -5,13 +5,18 @@ import Dashboard from "./pages/Dashboard";
 import AdminLayout from "./layout/AdminLayout";
 import "./App.css";
 import { Pages } from "./pages/Pages";
-import AllPageView from "./pages/NewPage/AllPageView";
-import HeroSlidesPage from "./components/HeroSlidesPage";
-import HomePageSections from "./components/HomePageSections";
-import IndustryIconsPage from "./components/IndustryIconsPage";
+import AllPageView from "./pages/AllPageView";
+import HeroSlidesPage from "./pages/HeroSlidesPage";
+import HomePageSections from "./pages/HomePageSections";
+import IndustryIconsPage from "./pages/IndustryIconsPage";
 import { Toaster } from "./components/ui/toaster";
-import AspirantsParentsPage from "./components/AspirantsParentsPage";
-import UpcomingEventsPage from "./components/UpcomingEventsPage";
+import AspirantsParentsPage from "./pages/AspirantsParentsPage";
+import UpcomingEventsPage from "./pages/UpcomingEventsPage";
+import FullTimePrograms from "./pages/FulltimeProgram";
+import ExecutivePrograms from "./pages/ExecutivePrograms";
+import IndustrySectorSpecialization from "./pages/IndustrySectorSpecialization";
+import ProgramCMSFullEditor from "./pages/ProgramCMSFullEditor";
+import ProgramEditor from "./pages/ProgramEditor";
 function App() {
   return (
     <Router>
@@ -20,10 +25,31 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/pages/home/none" element={<AllPageView />} />
           <Route path="/pages/home" element={<HomePageSections />} />
-          <Route path="/pages/home/slider" element={<HeroSlidesPage/>} />
-          <Route path="/pages/home/industry" element={<IndustryIconsPage/>} />
-          <Route path="/pages/home/Aspirants" element={<AspirantsParentsPage/>} />
-          <Route path="/pages/home/UpcomingEvents" element={<UpcomingEventsPage/>} />
+          <Route path="/pages/home/slider" element={<HeroSlidesPage />} />
+          <Route path="/pages/home/industry" element={<IndustryIconsPage />} />
+          <Route
+            path="/pages/home/Aspirants"
+            element={<AspirantsParentsPage />}
+          />
+          <Route
+            path="/pages/home/UpcomingEvents"
+            element={<UpcomingEventsPage />}
+          />
+          <Route path="/programs/fulltime" element={<FullTimePrograms />} />
+          <Route path="/programs/epgcp" element={<ExecutivePrograms />} />
+          <Route
+            path="/programs/iss"
+            element={<IndustrySectorSpecialization />}
+          />
+          {/* <Route path="/program/fulltime/*" element={<ProgramEditor />} /> */}
+          <Route
+            path="/program/fulltime/create"
+            element={<ProgramEditor mode="create" />}
+          />
+          <Route
+            path="/program/fulltime/:slug"
+            element={<ProgramEditor mode="edit" />}
+          />
           {/* <Route path="/users" element={<Users />} /> */}
         </Routes>
         <Toaster />

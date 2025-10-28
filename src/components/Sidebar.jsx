@@ -10,6 +10,7 @@ import {
   Settings,
   CalendarDays,
   LogOut,
+  GraduationCap,
   ChevronDown,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -32,6 +33,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     { to: "/students", label: "Students", icon: Users },
+    { to: "/Programs", label: "Programs", icon: GraduationCap,
+      submenu: [
+        { to: "/programs/fulltime", label: "Full Time Programs" },
+        { to: "/programs/epgcp", label: "Executive Post Graduate Certificate Programmes" },
+        { to: "/programs/iss", label: "Industry Sector Specialization" },
+      ], },
     { to: "/events", label: "Events", icon: CalendarDays },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
