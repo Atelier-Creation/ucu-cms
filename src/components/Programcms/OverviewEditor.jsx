@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ChevronsRight } from "lucide-react";
+import { ChevronsRight, Trash2 } from "lucide-react";
 
 export default function OverviewEditor({
   mode = "create", // "create" | "edit"
@@ -62,7 +62,7 @@ export default function OverviewEditor({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-1 md-p-6">
       <h1 className="text-2xl font-bold">
         {mode === "edit" ? "Edit Overview" : "Overview Editor"}
       </h1>
@@ -124,10 +124,10 @@ export default function OverviewEditor({
                   placeholder={`Highlight ${index + 1}`}
                 />
                 <Button
-                  variant="destructive"
+                  variant="goast"
                   onClick={() => removeHighlight(index)}
                 >
-                  Remove
+                  <Trash2 color="red"/>
                 </Button>
               </div>
             ))}
