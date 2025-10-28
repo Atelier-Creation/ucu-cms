@@ -43,10 +43,16 @@ function IndustrySectorSpecialization() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-foreground">
-        Industry Sector Specialization
-      </h1>
-
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-semibold text-foreground">
+          Industry Sector Specialization
+        </h1>
+        <div className="ml-2 text-right">
+          <Button onClick={() => navigate("/program/fulltime/create")}>
+            Add Program
+          </Button>
+        </div>
+      </div>
       <Accordion
         type="single"
         collapsible
