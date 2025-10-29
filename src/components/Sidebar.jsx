@@ -12,6 +12,7 @@ import {
   LogOut,
   GraduationCap,
   ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -47,8 +48,19 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const content = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="p-4 border-b">
-        <h1 className="text-2xl font-bold text-foreground">UCU CMS</h1>
+      <div className="p-4 border-b h-17 flex items-start">
+          <div className="position-relative align-items-center d-flex flex-column text-center text-lg-left flex-lg-column gap-3 new-footer-logo">
+            <div className="logo-batch-div">
+              <img src="./LogoBatch.svg" className="relative h-20 -top-4" alt="Batch Logo" />
+              <img
+                onClick={() => navigate("/")}
+                src="/logo.svg"
+                className="h-15 w-15 absolute top-2 left-11"
+                alt="Logo"
+              />
+            </div>
+          </div>
+          <p className="font-bold mt-1.5 text-lg">UCU CMS</p>
       </div>
 
       {/* Navigation */}
