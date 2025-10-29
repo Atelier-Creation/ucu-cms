@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ChevronsRight, Trash2 } from "lucide-react";
+import EditorMock from "../EditorMock";
 
 export default function OverviewEditor({
   mode = "create", // "create" | "edit"
@@ -109,6 +110,10 @@ export default function OverviewEditor({
             )}
           </div>
 
+          <Separator />
+
+
+<EditorMock/>
           <Separator />
 
           {/* Highlights */}

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ChevronsRight, Plus, Trash2 } from "lucide-react";
+import EditableTable from "./EditableTable";
+import EditorMock from "../EditorMock";
 
 export default function CurriculumEditor({
   mode = "create", // "create" | "edit"
@@ -21,8 +23,8 @@ export default function CurriculumEditor({
         title: "Year 1",
         points: [
           "Core management foundation courses",
-          "Experiential learning: ADMAP, Abhyudaya, DoCC, SOS",
-          "Corporate internship preparation",
+          // "Experiential learning: ADMAP, Abhyudaya, DoCC, SOS",
+          // "Corporate internship preparation",
         ],
       },
       {
@@ -150,8 +152,8 @@ export default function CurriculumEditor({
                     placeholder="Year title"
                   />
                 </div>
-
-                {year.points.map((p, pIndex) => (
+                  <EditorMock/>
+                {/* {year.points.map((p, pIndex) => (
                   <div key={pIndex} className="flex items-center ml-6">
                     <Input
                       className="mt-2 w-[95%]"
@@ -171,15 +173,17 @@ export default function CurriculumEditor({
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
-                ))}
+                ))} */}
 
-                <Button
+                <EditableTable/>
+
+                {/* <Button
                   className="bg-gray-700 hover:bg-gray-900 text-white cursor-pointer rounded-sm"
                   onClick={() => addPoint(yIndex)}
                 >
                   <Plus className="inline-block text-white" />
                   Add Point
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
           ))}
