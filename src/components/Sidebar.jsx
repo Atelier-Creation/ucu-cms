@@ -68,7 +68,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                     }
                     className={cn(
                       "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all",
-                      isOpen ? "bg-orange-50 text-orange-800" : "hover:bg-gray-100"
+                      isOpen ? "bg-blue-50 text-blue-800" : "hover:bg-gray-100"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                     />
                   </button>
                   {isOpen && (
-                    <div className="ml-7 border-l-2 border-orange-600 pl-4 space-y-1">
+                    <div className="ml-7 border-l-2 border-blue-600 pl-4 space-y-1">
                       {link.submenu.map((sub) => {
                         const isSubActive = pathname.includes(sub.to);
                         return (
@@ -92,11 +92,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                             to={sub.to}
                             onClick={() => setMobileOpen(false)}
                             className={cn(
-                              "flex items-center py-2 text-sm text-gray-700 hover:text-orange-700 capitalize transition",
-                              isSubActive && "font-semibold text-orange-800"
+                              "flex items-center py-2 text-sm text-gray-700 hover:text-blue-700 capitalize transition",
+                              isSubActive && "font-semibold text-blue-800"
                             )}
                           >
-                            <div className={cn("w-3 h-3 absolute left-[39px] rounded-full border-2 bg-background border-orange-800 mr-2", isSubActive && "border-white w-4 h-4 left-[37px] bg-orange-800")} />
+                            <div className={cn("w-3 h-3 absolute left-[39px] rounded-full border-2 bg-background border-blue-800 mr-2", isSubActive && "border-white w-4 h-4 left-[37px] bg-blue-800")} />
                             {sub.label}
                           </Link>
                         );
@@ -115,7 +115,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 className={cn(
                   "w-full justify-start text-sm font-medium gap-3 py-2 hover:bg-gray-100",
                   isActive &&
-                    "bg-orange-50 text-orange-800 hover:bg-gray-200 hover:text-gray-900"
+                    "bg-blue-50 text-blue-800 hover:bg-gray-200 hover:text-gray-900"
                 )}
               >
                 <Link to={link.to} onClick={() => setMobileOpen(false)} className="flex items-center">
