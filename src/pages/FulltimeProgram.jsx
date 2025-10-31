@@ -34,17 +34,6 @@ const fullTimeProgramsData = [
         submenu: [
           { label: "PGPM-ELITE", link: "/program/fulltime/pgpm-elite" },
           { label: "PGDM", link: "/program/fulltime/pgdm" },
-          {
-            label: "Flexi Program",
-            submenu: [
-              { label: "PGPM Flex", link: "/program/fulltime/pgpm-flex" },
-              { label: "PGXPM", link: "/program/fulltime/pgxpm" },
-            ],
-          },
-          {
-            label: "Career Reboot Program for Women",
-            link: "/program/fulltime/career-reboot",
-          },
         ],
       },
     ],
@@ -147,7 +136,7 @@ function FullTimePrograms() {
                 </div>
               </AccordionTrigger>
 
-              <AccordionContent className="bg-gray-50 p-4 space-y-3">
+              <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
                 {page.sections.map((section, i) => (
                   <Accordion
                     key={i}

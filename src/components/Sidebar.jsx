@@ -37,8 +37,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     { to: "/Programs", label: "Programs", icon: GraduationCap,
       submenu: [
         { to: "/programs/fulltime", label: "Full Time Programs" },
+        { to: "/programs/flexi-program", label: "Flexi Programs" },
+        { to: "/programs/crpfw", label: "Career Reboot Program for Women" },
         { to: "/programs/epgcp", label: "Executive Post Graduate Certificate Programmes" },
-        { to: "/programs/iss", label: "Industry Sector Specialization" },
       ], },
     { to: "/events", label: "Events", icon: CalendarDays },
     { to: "/settings", label: "Settings", icon: Settings },
@@ -48,19 +49,21 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const content = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="p-4 border-b h-17 flex items-start">
-          <div className="position-relative align-items-center d-flex flex-column text-center text-lg-left flex-lg-column gap-3 new-footer-logo">
+      <div className="p-4 border-b">
+          <div className=" flex flex-col items-center justify-center">
             <div className="logo-batch-div">
-              <img src="./LogoBatch.svg" className="relative h-20 -top-4" alt="Batch Logo" />
-              <img
-                onClick={() => navigate("/")}
-                src="/logo.svg"
-                className="h-15 w-15 absolute top-2 left-11"
-                alt="Logo"
-              />
+              {/* <img src="./LogoBatch.svg" className="relative h-20 -top-4" alt="Batch Logo" /> */}
+<img
+  onClick={() => navigate("/")}
+  src="/logo.svg"
+  alt="Logo"
+  className="h-30 w-30 transition-all duration-300 dark:[filter:brightness(0)_invert(1)]"
+/>
+
             </div>
+              <p className="font-bold text-lg text-center">Admin Dashboard</p>
           </div>
-          <p className="font-bold mt-1.5 text-lg">UCU CMS</p>
+
       </div>
 
       {/* Navigation */}
@@ -80,7 +83,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                     }
                     className={cn(
                       "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all",
-                      isOpen ? "bg-blue-50 text-blue-800" : "hover:bg-gray-100"
+                      isOpen ? "bg-blue-50 text-blue-800" : "hover:bg-gray-100",
+                      //Dark mode
+                      "dark:text-white dark:hover:bg-gray-800 dark:bg-transparent",
+                      isOpen && "dark:bg-blue-50 dark:text-blue-800"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -105,6 +111,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                             onClick={() => setMobileOpen(false)}
                             className={cn(
                               "flex items-center py-2 text-sm text-gray-700 hover:text-blue-700 capitalize transition",
+                              "dark:text-gray-300 dark:hover:text-blue-800",
                               isSubActive && "font-semibold text-blue-800"
                             )}
                           >

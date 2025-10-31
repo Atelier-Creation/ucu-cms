@@ -30,7 +30,7 @@ export default function Navbar({ setMobileOpen }) {
           <Menu className="h-5 w-5" />
         </Button>
 
-        <h1 className="text-xl font-bold text-foreground">Admin Dashboard</h1>
+        {/* <h1 className="text-xl font-bold text-foreground">Admin Dashboard</h1> */}
       </div>
 
       {/* Center section - search */}

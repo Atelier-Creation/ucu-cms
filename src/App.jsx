@@ -17,6 +17,8 @@ import ExecutivePrograms from "./pages/ExecutivePrograms";
 import IndustrySectorSpecialization from "./pages/IndustrySectorSpecialization";
 import ProgramCMSFullEditor from "./pages/ProgramCMSFullEditor";
 import ProgramEditor from "./pages/ProgramEditor";
+import FlexiProgram from "./pages/FlexiProgram";
+import CrpfwProgram from "./pages/CrpfwProgram";
 function App() {
   return (
     <Router>
@@ -36,6 +38,8 @@ function App() {
             element={<UpcomingEventsPage />}
           />
           <Route path="/programs/fulltime" element={<FullTimePrograms />} />
+          <Route path="/programs/flexi-program" element={<FlexiProgram />} />
+          <Route path="/programs/crpfw" element={<CrpfwProgram />} />
           <Route path="/programs/epgcp" element={<ExecutivePrograms />} />
           <Route
             path="/programs/iss"

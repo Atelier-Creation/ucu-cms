@@ -32,6 +32,25 @@ const executiveProgramsData = [
               { label: "Data Science & AI", link: "/program/epgcp/functional-certifications/data-science" },
             ],
           },
+          {
+            label: "Industry Sector Specialization",
+            link: "/program/epgcp/functional-certifications",
+            submenu: [
+          { label: "FinTech", link: "/program/fintech" },
+          {
+            label: "Global Capability Centers (GCC)",
+            link: "/program/gcc",
+          },
+          {
+            label: "Semi conductors",
+            link: "/program/semi-conductors",
+          },
+          {
+            label: "Health Care & Life Science.",
+            link: "/program/hc-ls",
+          },
+            ],
+          },
         ],
       },
     ],
