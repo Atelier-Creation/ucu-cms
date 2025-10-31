@@ -65,11 +65,11 @@ function App() {
           />
           {/* <Route path="/program/epgcp/functional-certifications/*" element={<ProgramEditor />} /> */}
           <Route
-            path="/program/Executive-Post-Graduate-Certificate-Programmes/functional-certifications/create"
+            path="/programs/Executive-Post-Graduate-Certificate-Programmes/create"
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/program/Executive-Post-Graduate-Certificate-Programmes/functional-certifications/:slug"
+            path="/programs/Executive-Post-Graduate-Certificate-Programmes/:slug"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/programs/crpfw/career-for-womens/*" element={<ProgramEditor />} /> */}
