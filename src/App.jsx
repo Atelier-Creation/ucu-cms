@@ -39,8 +39,8 @@ function App() {
           />
           <Route path="/programs/fulltime" element={<FullTimePrograms />} />
           <Route path="/programs/flexi-program" element={<FlexiProgram />} />
-          <Route path="/programs/crpfw" element={<CrpfwProgram />} />
-          <Route path="/programs/epgcp" element={<ExecutivePrograms />} />
+          <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
+          <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
           <Route
             path="/programs/iss"
             element={<IndustrySectorSpecialization />}
@@ -65,20 +65,29 @@ function App() {
           />
           {/* <Route path="/program/epgcp/functional-certifications/*" element={<ProgramEditor />} /> */}
           <Route
-            path="/program/epgcp/functional-certifications/create"
+            path="/program/Executive-Post-Graduate-Certificate-Programmes/functional-certifications/create"
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/program/epgcp/functional-certifications/:slug"
+            path="/program/Executive-Post-Graduate-Certificate-Programmes/functional-certifications/:slug"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/programs/crpfw/career-for-womens/*" element={<ProgramEditor />} /> */}
           <Route
-            path="/programs/crpfw/create"
+            path="/programs/Career-Reboot-Program-for-Women/create"
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/programs/crpfw/:slug"
+            path="/programs/Career-Reboot-Program-for-Women/:slug"
+            element={<ProgramEditor mode="edit" />}
+          />
+          {/* <Route path="/programs/Industry-Sector-Specialization/career-for-womens/*" element={<ProgramEditor />} /> */}
+          <Route
+            path="/program/Industry-Sector-Specialization/create"
+            element={<ProgramEditor mode="create" />}
+          />
+          <Route
+            path="/program/Industry-Sector-Specialization/:slug"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/users" element={<Users />} /> */}

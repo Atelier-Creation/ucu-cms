@@ -17,6 +17,7 @@ import PlacementEditor from "@/components/Programcms/PlacementEditor";
 import ProgramHeaderEditor from "@/components/Programcms/ProgramHeaderEditor";
 import { Label } from "@/components/ui/label";
 import { PanelsTopLeft } from "lucide-react";
+import { useLocation, useParams, Link } from "react-router-dom";
 
 export default function ProgramEditor({
   mode = "create", // "create" | "edit"
@@ -26,7 +27,17 @@ export default function ProgramEditor({
 }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [programData, setProgramData] = useState(initialData || {});
+const location = useLocation();
+const params = useParams();
 
+const pathnames = location.pathname.split("/").filter(Boolean);
+// Example: ["program", "fulltime", "pgdm"]
+
+const formattedPath = (segment) => {
+  return segment
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
   useEffect(() => {
     if (initialData) setProgramData(initialData);
   }, [initialData]);
@@ -49,30 +60,43 @@ export default function ProgramEditor({
     <div className="space-y-6 px-1 sm:px-6">
       {/* Breadcrumb */}
       <div className="overflow-x-auto">
-        <Breadcrumb className="min-w-max sm:min-w-0">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">
-                <PanelsTopLeft className="w-4 h-4 inline-block mr-1" />
-                Home
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/programs/fulltime">
-                Full Time Programs
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
+<Breadcrumb className="min-w-max sm:min-w-0">
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink asChild>
+        <Link to="/">
+          <PanelsTopLeft className="w-4 h-4 inline-block mr-1" />
+          Home
+        </Link>
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+
+    {pathnames.map((segment, index) => {
+      const routeTo = "/" + pathnames.slice(0, index + 1).join("/");
+      const isLast = index === pathnames.length - 1;
+
+      return (
+        <React.Fragment key={index}>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            {isLast ? (
               <BreadcrumbPage>
                 {mode === "edit" && initialData?.title
                   ? initialData.title
-                  : "New Program"}
+                  : formattedPath(segment)}
               </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+            ) : (
+              <BreadcrumbLink asChild>
+                <Link to={routeTo}>{formattedPath(segment)}</Link>
+              </BreadcrumbLink>
+            )}
+          </BreadcrumbItem>
+        </React.Fragment>
+      );
+    })}
+  </BreadcrumbList>
+</Breadcrumb>
+
       </div>
 
       {/* Header */}

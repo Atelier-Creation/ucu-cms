@@ -38,8 +38,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       submenu: [
         { to: "/programs/fulltime", label: "Full Time Programs" },
         { to: "/programs/flexi-program", label: "Flexi Programs" },
-        { to: "/programs/crpfw", label: "Career Reboot Program for Women" },
-        { to: "/programs/epgcp", label: "Executive Post Graduate Certificate Programmes" },
+        { to: "/programs/Career-Reboot-Program-for-Women", label: "Career Reboot Program for Women" },
+        { to: "/programs/Executive-Post-Graduate-Certificate-Programmes", label: "Executive Post Graduate Certificate Programmes" },
       ], },
     { to: "/events", label: "Events", icon: CalendarDays },
     { to: "/settings", label: "Settings", icon: Settings },
