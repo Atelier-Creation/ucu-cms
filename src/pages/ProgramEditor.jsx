@@ -100,13 +100,13 @@ export default function ProgramEditor({
           </Label>
 
           {/* Sticky Scrollable Tabs (Mobile-friendly) */}
-          <div className="z-20 bg-white">
+          <div className="z-20 bg-white dark:bg-black/0">
             <div
               className="
                 overflow-x-auto no-scrollbar 
                 overscroll-contain 
                 touch-pan-x 
-                border-b border-gray-200
+                border-b border-gray-200 
               "
             >
               <Tabs
@@ -118,7 +118,7 @@ export default function ProgramEditor({
                   className="
                     flex sm:grid sm:grid-cols-5 
                     w-max sm:w-[90%] mx-auto sm:mx-10 
-                    bg-gray-100 px-4 sm:px-6 
+                    bg-gray-100 dark:bg-black/0 px-4 sm:px-6 
                     whitespace-nowrap
                   "
                 >
@@ -220,7 +220,7 @@ export default function ProgramEditor({
         )}
         <button
           onClick={handleSubmit}
-          className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+          className="w-full sm:w-auto px-4 py-2 bg-primary text-white dark:text-black rounded-md hover:bg-primary/90"
         >
           {mode === "edit" ? "Update Program" : "Create Program"}
         </button>

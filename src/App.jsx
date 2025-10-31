@@ -54,6 +54,33 @@ function App() {
             path="/program/fulltime/:slug"
             element={<ProgramEditor mode="edit" />}
           />
+          {/* <Route path="/program/flexi/*" element={<ProgramEditor />} /> */}
+          <Route
+            path="/program/flexi/create"
+            element={<ProgramEditor mode="create" />}
+          />
+          <Route
+            path="/program/flexi/:slug"
+            element={<ProgramEditor mode="edit" />}
+          />
+          {/* <Route path="/program/epgcp/functional-certifications/*" element={<ProgramEditor />} /> */}
+          <Route
+            path="/program/epgcp/functional-certifications/create"
+            element={<ProgramEditor mode="create" />}
+          />
+          <Route
+            path="/program/epgcp/functional-certifications/:slug"
+            element={<ProgramEditor mode="edit" />}
+          />
+          {/* <Route path="/programs/crpfw/career-for-womens/*" element={<ProgramEditor />} /> */}
+          <Route
+            path="/programs/crpfw/create"
+            element={<ProgramEditor mode="create" />}
+          />
+          <Route
+            path="/programs/crpfw/:slug"
+            element={<ProgramEditor mode="edit" />}
+          />
           {/* <Route path="/users" element={<Users />} /> */}
         </Routes>
         <Toaster />

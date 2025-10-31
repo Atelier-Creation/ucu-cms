@@ -33,8 +33,8 @@ const fullTimeProgramsData = [
                 header: "Programs",
                 submenu: [
 
-                    { label: "PGPM Flex", link: "/program/fulltime/pgpm-flex" },
-                    { label: "PGXPM", link: "/program/fulltime/pgxpm" },
+                    { label: "PGPM Flex", link: "/program/flexi/pgpm-flex" },
+                    { label: "PGXPM", link: "/program/flexi/pgxpm" },
                 ],
             },
         ],

@@ -42,7 +42,7 @@ export default function EditableTable() {
   };
 
   return (
-    <div className="p-6 space-y-4 rounded-2xl bg-white">
+    <div className="p-6 space-y-4 rounded-2xl bg-white dark:bg-black/0">
       <div className="flex gap-2">
         <Button onClick={addColumn}>+ Add Column</Button>
         <Button onClick={addRow}>+ Add Row</Button>

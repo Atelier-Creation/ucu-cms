@@ -64,7 +64,7 @@ const ToolbarButton = ({ onClick, isActive, title, children }) => (
     type="button"
     onClick={onClick}
     className={`p-1.5 rounded-md cursor-pointer transition-colors ${
-      isActive ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
+      isActive ? "bg-blue-600 text-white" : "text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100"
     }`}
     title={title}
   >
@@ -150,7 +150,7 @@ const EditorToolbar = ({ editor }) => {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-1 rounded px-2 py-1 bg-white mb-2">
+      <div className="flex flex-wrap items-center gap-1 rounded px-2 py-1 bg-white dark:bg-black/0 dark:text-white mb-2">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
@@ -366,12 +366,12 @@ const formattedTitle = useMemo(() => (title ? title.replace(/-/g, " ") : "Object
 
   return (
     <>
-      <div className="space-y-4 p-4 rounded-lg bg-white">
-        <h2 className="text-xl font-semibold capitalize text-gray-800">
+      <div className="space-y-4 p-4 rounded-lg bg-white dark:bg-black/0 dark:text-white">
+        <h2 className="text-xl font-semibold capitalize text-gray-800 dark:text-white">
           {formattedTitle}
         </h2>
         <div className="flex items-center justify-end">
-          <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer user-select-none">
+          <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-white cursor-pointer user-select-none">
             <input
               type="checkbox"
               className="form-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -425,7 +425,7 @@ const formattedTitle = useMemo(() => (title ? title.replace(/-/g, " ") : "Object
           <button
             onClick={handleSave}
             disabled={isSaving || !isDirty}
-            className="w-full sm:w-auto bg-[#783904] text-white px-6 py-2 rounded-md hover:bg-[#ad4f04] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400 font-semibold"
+            className="w-full sm:w-auto bg-[#783904] text-white dark:text-black dark:bg-blue-50 px-6 py-2 rounded-md hover:bg-[#ad4f04] transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400 font-semibold"
           >
             {isSaving ? "Saving..." : "Save"}
           </button>
