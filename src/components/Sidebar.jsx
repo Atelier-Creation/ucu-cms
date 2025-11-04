@@ -14,7 +14,13 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useState } from "react";
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
@@ -34,36 +40,44 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     { to: "/students", label: "Students", icon: Users },
-    { to: "/Programs", label: "Programs", icon: GraduationCap,
+    {
+      to: "/Programs",
+      label: "Programs",
+      icon: GraduationCap,
       submenu: [
         { to: "/programs/fulltime", label: "Full Time Programs" },
         { to: "/programs/flexi-program", label: "Flexi Programs" },
-        { to: "/programs/Career-Reboot-Program-for-Women", label: "Career Reboot Program for Women" },
-        { to: "/programs/Executive-Post-Graduate-Certificate-Programmes", label: "Executive Post Graduate Certificate Programmes" },
-      ], },
+        {
+          to: "/programs/Career-Reboot-Program-for-Women",
+          label: "Career Reboot Program for Women",
+        },
+        {
+          to: "/programs/Executive-Post-Graduate-Certificate-Programmes",
+          label: "Executive Post Graduate Certificate Programmes",
+        },
+      ],
+    },
     { to: "/events", label: "Events", icon: CalendarDays },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
 
   // Sidebar content
   const content = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-w-70">
       {/* Logo */}
       <div className="p-4 border-b">
-          <div className=" flex flex-col items-center justify-center">
-            <div className="logo-batch-div">
-              {/* <img src="./LogoBatch.svg" className="relative h-20 -top-4" alt="Batch Logo" /> */}
-<img
-  onClick={() => navigate("/")}
-  src="/logo.svg"
-  alt="Logo"
-  className="h-30 w-30 transition-all duration-300 dark:[filter:brightness(0)_invert(1)]"
-/>
-
-            </div>
-              <p className="font-bold text-lg text-center">Admin Dashboard</p>
+        <div className=" flex flex-col items-center justify-center">
+          <div className="logo-batch-div">
+            {/* <img src="./LogoBatch.svg" className="relative h-20 -top-4" alt="Batch Logo" /> */}
+            <img
+              onClick={() => navigate("/")}
+              src="/logo.svg"
+              alt="Logo"
+              className="h-30 w-30 transition-all duration-300 dark:[filter:brightness(0)_invert(1)]"
+            />
           </div>
-
+          <p className="font-bold text-lg text-center">Admin Dashboard</p>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -78,9 +92,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
               return (
                 <div key={link.label} className="space-y-1">
                   <button
-                    onClick={() =>
-                      setOpenMenu(isOpen ? null : link.label)
-                    }
+                    onClick={() => setOpenMenu(isOpen ? null : link.label)}
                     className={cn(
                       "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all",
                       isOpen ? "bg-blue-50 text-blue-800" : "hover:bg-gray-100",
@@ -115,7 +127,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                               isSubActive && "font-semibold text-blue-800"
                             )}
                           >
-                            <div className={cn("w-3 h-3 absolute left-[39px] rounded-full border-2 bg-background border-blue-800 mr-2", isSubActive && "border-white w-4 h-4 left-[37px] bg-blue-800")} />
+                            <div
+                              className={cn(
+                                "w-3 h-3 absolute left-[39px] rounded-full border-2 bg-background border-blue-800 mr-2",
+                                isSubActive &&
+                                  "border-white w-4 h-4 left-[37px] bg-blue-800"
+                              )}
+                            />
                             {sub.label}
                           </Link>
                         );
@@ -137,7 +155,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                     "bg-blue-50 text-blue-800 hover:bg-gray-200 hover:text-gray-900"
                 )}
               >
-                <Link to={link.to} onClick={() => setMobileOpen(false)} className="flex items-center">
+                <Link
+                  to={link.to}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center"
+                >
                   <Icon className="h-4 w-4" />
                   {link.label}
                 </Link>
@@ -150,12 +172,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       <Separator />
 
       {/* Footer */}
-      <div className="p-4 flex flex-col gap-2">
+      <div className="p-4 flex flex-col items-center gap-4 w-full border-t bg-background">
         <Button variant="ghost" className="justify-start gap-2 w-full">
           <LogOut className="h-4 w-4" />
           Logout
         </Button>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground text-center w-full">
           © {new Date().getFullYear()} UCU CMS
         </span>
       </div>
