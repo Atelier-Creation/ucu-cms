@@ -35,7 +35,11 @@ export default function ProgramHeaderEditor() {
 
       <CardContent className="space-y-6">
         {/* Banner Image */}
+
+        <div className="space-y-2">
+        <Label>Upload Program Banner Image</Label>
         <FileUploader/>
+        </div>
 
         {/* Title */}
         <div className="space-y-2">

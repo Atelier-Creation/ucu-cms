@@ -58,6 +58,43 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     { to: "/events", label: "Events", icon: CalendarDays },
+    {
+      to: "/advisory-councils",
+      label: "Advisory Councils",
+      icon: GraduationCap,
+      submenu: [
+        { to: "/advisory/Business-Advisory-Council", label: "Business Advisory Council" },
+        { to: "/advisory/Academic-Advisory-Council", label: "Academic Advisory Council" },
+        {
+          to: "/advisory/CHRO-Advisory-Council",
+          label: "CHRO Advisory Council",
+        },
+        {
+          to: "/advisory/Talent-Advisory-Council",
+          label: "Talent Advisory Council",
+        },
+        {
+          to: "/advisory/L&D-Advisory-Council",
+          label: "L&D Advisory Council",
+        },
+        {
+          to: "/advisory/Young-CXO-Council",
+          label: "Young CXO Council ",
+        },
+        {
+          to: "/advisory/Rising-Leaders-Council ",
+          label: "Rising Leaders' Council ",
+        },
+        {
+          to: "/advisory/Our-Brand-Ambassadors",
+          label: "Our Brand Ambassadors",
+        },
+        {
+          to: "/submenu/advisory/SME-Program-Advisory-Council",
+          label: "SME Program Advisory Council",
+        },
+      ],
+    },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
 
@@ -131,7 +168,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                               className={cn(
                                 "w-3 h-3 absolute left-[39px] rounded-full border-2 bg-background border-blue-800 mr-2",
                                 isSubActive &&
-                                  "border-white w-4 h-4 left-[37px] bg-blue-800"
+                                "border-white w-4 h-4 left-[37px] bg-blue-800"
                               )}
                             />
                             {sub.label}
@@ -152,7 +189,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 className={cn(
                   "w-full justify-start text-sm font-medium gap-3 py-2 hover:bg-gray-100",
                   isActive &&
-                    "bg-blue-50 text-blue-800 hover:bg-gray-200 hover:text-gray-900"
+                  "bg-blue-50 text-blue-800 hover:bg-gray-200 hover:text-gray-900"
                 )}
               >
                 <Link
@@ -187,7 +224,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 border-r bg-background shadow-lg">
+      <aside className="hidden md:flex flex-col w-64 h-screen border-r bg-background shadow-lg overflow-hidden hover:overflow-y-auto sidebar-scroll">
         {content}
       </aside>
 

@@ -6,3 +6,30 @@ body {
   color: var(--color-foreground);
   transition: background-color 0.3s, color 0.3s;
 }
+
+/* Only affects the sidebar */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #e9f2f7 transparent;
+}
+
+/* Chrome, Edge, Safari */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 2px;
+}
+
+/* Create top & bottom spacing for scrollbar track */
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0; /* adds space above and below the scrollbar */
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #a0aec0;
+  border-radius: 4px;
+  min-height: 20px; /* ensures it's not too tiny */
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}

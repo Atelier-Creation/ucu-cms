@@ -30,7 +30,12 @@ export default function ProgramEditor({
 const location = useLocation();
 const params = useParams();
 
-const pathnames = location.pathname.split("/").filter(Boolean);
+const excludedSegments = ["program", "fulltime",];
+
+const pathnames = location.pathname
+  .split("/")
+  .filter(Boolean)
+  .filter(segment => !excludedSegments.includes(segment.toLowerCase()));
 // Example: ["program", "fulltime", "pgdm"]
 
 const formattedPath = (segment) => {

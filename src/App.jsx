@@ -19,6 +19,8 @@ import ProgramCMSFullEditor from "./pages/ProgramCMSFullEditor";
 import ProgramEditor from "./pages/ProgramEditor";
 import FlexiProgram from "./pages/FlexiProgram";
 import CrpfwProgram from "./pages/CrpfwProgram";
+import CouncilPage from "./pages/CouncilPage/CouncilPage";
+import CouncilSubmenuPage from "./pages/CouncilPage/CouncilSubmenuPage";
 function App() {
   return (
     <Router>
@@ -41,6 +43,8 @@ function App() {
           <Route path="/programs/flexi-program" element={<FlexiProgram />} />
           <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
           <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
+          <Route path="/advisory/*" element={<CouncilPage />} />
+          <Route path="/submenu/advisory/SME-Program-Advisory-Council" element={<CouncilSubmenuPage />} />
           <Route
             path="/programs/iss"
             element={<IndustrySectorSpecialization />}

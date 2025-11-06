@@ -72,7 +72,7 @@ export default function FileUploader({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      {/* <Label>{label}</Label> */}
 
       {value ? (
         <div className="flex items-center gap-3 border rounded-md p-2 bg-muted/20">
