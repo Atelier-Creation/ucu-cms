@@ -29,25 +29,13 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-
+import {
+  createBanner,
+  getBanners,
+  updateBanner,
+  deleteBanner,
+} from "@/Api/HomeApi";
 // --- Initial Hero Data ---
-const heroData = [
-  {
-    header: `Guided by Industry & Academic Icons`,
-    para: `Every program is co-created and co-delivered by academia and industry—where faculty and industry CXOs collaborate to build future-ready, job-relevant learning experiences for students.`,
-    image: bannerImage,
-  },
-  {
-    header: `Future Ready Programs for <span class="text-green-500">Emerging Industry</span> Sectors`,
-    para: `From GCC and FinTech to Healthcare and Semiconductor industries, our specialised programs are expertly tailored to empower talent to lead innovation and deliver transformative strategies from day one.`,
-    image: bannerImage,
-  },
-  {
-    header: `<span class="text-green-500">Business Advisory</span> Council`,
-    para: `Our Business Advisory Council (BAC) anchors UCU’s strategic vision—shaping curriculum, guiding long-term direction, and ensuring every program delivers tangible career value from day one.`,
-    image: bannerImage,
-  },
-];
 
 
 const fetchSlides = async () =>
@@ -65,104 +53,99 @@ export default function HeroSlidesPage() {
   const [previewImage, setPreviewImage] = useState(null);
   const [previewHeader, setPreviewHeader] = useState("");
   const [undoStack, setUndoStack] = useState([]);
-
   const { register, handleSubmit, reset, setValue } = useForm();
 
-  // Seed data on first load
+  // ✅ Fetch banners from backend
   useEffect(() => {
-    localStorage.setItem("heroSlides", "");
-    const loadSlides = async () => {
-      const stored = await fetchSlides();
-      if (stored.length === 0) {
-        const seeded = heroData.map((d, i) => ({
-          id: Date.now() + i,
-          header: d.header,
-          description: d.para,
-          image: d.image,
-          applyLink: "",
-          brochureLink: "",
-        }));
-        await saveSlides(seeded);
-        setSlides(seeded);
-      } else {
-        setSlides(stored);
-      }
-    };
-    loadSlides();
+    fetchSlides();
   }, []);
 
-  const onSubmit = async (data) => {
-    if (data.image instanceof File) {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        data.image = reader.result;
-        await saveSlideData(data);
-      };
-      reader.readAsDataURL(data.image);
-    } else {
-      await saveSlideData(data);
+  const fetchSlides = async () => {
+    try {
+      const data = await getBanners();
+      console.log("Fetched Banners:", data); // 👀 check the shape
+      setSlides(Array.isArray(data) ? data : data.data || []); // ✅ fix
+    } catch (error) {
+      console.error("Error fetching banners:", error);
     }
   };
 
-  const saveSlideData = async (data) => {
-    let updatedSlides;
+
+  // ✅ Handle Add/Edit form submit
+const onSubmit = async (data) => {
+  try {
+    const payload = {
+      bannerTitle: data.header,
+      bannerContent: data.description,
+      bannerImage: previewImage ? [previewImage] : [],
+      applyLink: data.applyLink || "/apply",
+      pdf: data.brochureLink || "/brochure.pdf",
+    };
+
     if (editingSlide) {
-      updatedSlides = slides.map((s) =>
-        s.id === editingSlide.id ? { ...s, ...data, id: editingSlide.id } : s
-      );
+      await updateBanner(editingSlide._id, payload);
     } else {
-      updatedSlides = [...slides, { ...data, id: Date.now() }];
+      await createBanner(payload);
     }
 
-    await saveSlides(updatedSlides);
-    setSlides(updatedSlides);
+    await fetchSlides();
     setDialogOpen(false);
     setEditingSlide(null);
-    setPreviewImage(null);
     reset();
-  };
+    setPreviewImage(null);
+  } catch (error) {
+    console.error("Error saving banner:", error);
+  }
+};
 
+
+  // ✅ Edit
   const handleEdit = (slide) => {
     setEditingSlide(slide);
-    reset(slide);
-    setPreviewHeader(slide.header || "");
-    setPreviewImage(slide.image || null);
+    reset({
+      header: slide.bannerTitle,
+      description: slide.bannerContent,
+    });
+    setPreviewImage(slide.bannerImage?.[0] || null);
+    setPreviewHeader(slide.bannerTitle);
     setDialogOpen(true);
   };
 
-  const handleDelete = async (slideId) => {
-    const updatedSlides = slides.filter((s) => s.id !== slideId);
-    await saveSlides(updatedSlides);
-    setSlides(updatedSlides);
+  // ✅ Delete
+  const handleDelete = async (id) => {
+    await deleteBanner(id);
+    await fetchSlides();
   };
 
+  // ✅ Image Preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setPreviewImage(URL.createObjectURL(file));
-      setValue("image", file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPreviewImage(reader.result);
+    reader.readAsDataURL(file);
   };
 
+  // ✅ Undo highlight shortcut
   useEffect(() => {
-  const handleUndo = (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
-      e.preventDefault();
-      setUndoStack((prev) => {
-        if (prev.length === 0) return prev;
-        const newStack = [...prev];
-        const lastValue = newStack.pop();
-        setValue("header", lastValue);
-        setPreviewHeader(lastValue);
-        const input = document.getElementById("headerInput");
-        if (input) input.value = lastValue;
-        return newStack;
-      });
-    }
-  };
-  window.addEventListener("keydown", handleUndo);
-  return () => window.removeEventListener("keydown", handleUndo);
-}, [setValue]);
+    const handleUndo = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        setUndoStack((prev) => {
+          if (!prev.length) return prev;
+          const newStack = [...prev];
+          const lastValue = newStack.pop();
+          setValue("header", lastValue);
+          setPreviewHeader(lastValue);
+          const input = document.getElementById("headerInput");
+          if (input) input.value = lastValue;
+          return newStack;
+        });
+      }
+    };
+    window.addEventListener("keydown", handleUndo);
+    return () => window.removeEventListener("keydown", handleUndo);
+  }, [setValue]);
 
 
   return (
@@ -188,7 +171,7 @@ export default function HeroSlidesPage() {
       </Breadcrumb>
 
       <h1 className="text-3xl font-bold">Hero Slides Management</h1>
-      
+
       {/* Add / Edit Slide Sheet */}
       <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
         <SheetTrigger asChild>
@@ -338,30 +321,32 @@ export default function HeroSlidesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {slides.map((slide) => (
-              <TableRow key={slide.id}>
+            {Array.isArray(slides) && slides.map((slide) => (
+              <TableRow key={slide._id}>
                 <TableCell>
                   <div
-                    dangerouslySetInnerHTML={{ __html: slide.header }}
+                    dangerouslySetInnerHTML={{ __html: slide.bannerTitle }}
                     className="font-medium"
                   />
                 </TableCell>
+
                 <TableCell
                   className="max-w-[200px] truncate"
-                  title={slide.description}
+                  title={slide.bannerContent}
                 >
-                  {slide.description}
+                  {slide.bannerContent}
                 </TableCell>
 
                 <TableCell>
-                  {slide.image && (
+                  {slide.bannerImage?.[0] && (
                     <img
-                      src={slide.image}
+                      src={slide.bannerImage[0]}
                       alt="slide"
                       className="h-12 w-24 object-cover rounded"
                     />
                   )}
                 </TableCell>
+
                 <TableCell className="flex gap-2">
                   <Button
                     variant="ghost"
@@ -373,7 +358,7 @@ export default function HeroSlidesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(slide.id)}
+                    onClick={() => handleDelete(slide._id)}
                   >
                     <Trash2 size={16} />
                   </Button>
@@ -381,6 +366,7 @@ export default function HeroSlidesPage() {
               </TableRow>
             ))}
           </TableBody>
+
         </Table>
       </Card>
     </div>

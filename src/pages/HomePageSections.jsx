@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import Industrythumnail from "@/assets/Industrythumnail.png";
 import Aspirantsthumbnail from "@/assets/Aspirantsthumbnail.png";
 import UpcomingEventsThumbnail from "@/assets/UpcomingEventsThumbnail.png";
 import { Home, PanelsTopLeft, Pencil } from "lucide-react";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -63,7 +62,6 @@ const homeSections = [
 
 function HomePageSections() {
   const navigate = useNavigate();
-
   return (
     <div className="p-6 space-y-6">
       {/* Page Header */}
