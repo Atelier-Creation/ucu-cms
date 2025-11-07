@@ -227,7 +227,7 @@ const onSubmit = async (data) => {
                     const before = value.slice(0, start);
                     const after = value.slice(end);
 
-                    const highlightTag = `<span class='text-green-500'>${selectedText}</span>`;
+                    const highlightTag = `<span style="color: #5ac501;">${selectedText}</span>`;
                     const alreadyHighlighted = value.includes(highlightTag);
                     const newValue = alreadyHighlighted
                       ? value.replace(highlightTag, selectedText)

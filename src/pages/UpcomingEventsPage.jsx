@@ -63,7 +63,7 @@ const UpcomingEventsPage = () => {
 
   const handleAdd = async () => {
     const { date, category, eventTitle, eventDesc, exploreLink, applyLink } = newEvent
-    if (!date || !category || !eventTitle || !eventDesc || !exploreLink || !applyLink) {
+    if (!date || !category || !eventTitle || !eventDesc) {
       toast({ title: "Error", description: "All fields are required" })
       return
     }
