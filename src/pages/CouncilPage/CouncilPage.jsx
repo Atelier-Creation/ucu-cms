@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,6 +7,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PanelsTopLeft } from "lucide-react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -22,6 +36,7 @@ function CouncilPage({
 }) {
   const location = useLocation();
   const params = useParams();
+  const [selectedCouncil, setSelectedCouncil] = useState("");
   // remove "advisory" from breadcrumb
   const pathnames = location.pathname
     .split("/")
@@ -81,53 +96,64 @@ function CouncilPage({
         </p>
       </div>
 
-    <Card>
-      <CardHeader>
-        <h2 className="text-xl font-semibold">Advisory Council Advisors</h2>
-      </CardHeader>
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Advisory Council Advisors</h2>
+        </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Banner Image */}
+        <CardContent className="space-y-6">
+          {/* Banner Image */}
 
-        <div className="space-y-2">
-        <Label>Upload Advisors Image</Label>
-        <FileUploader/>
-        </div>
-        {/* Title */}
-        <div className="space-y-2">
-          <Label>Advisors Name</Label>
-          <Input
-            placeholder="Enter program title"
-          />
-        </div>
+          <div className="space-y-2">
+            <Label>Upload Advisors Image</Label>
+            <FileUploader />
+          </div>
 
-        {/* Subtitle */}
-        <div className="space-y-2">
-          <Label>Advisors Professional</Label>
-          <Input
-            placeholder="Enter subtitle"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Advisors Linkedin URL</Label>
-          <Input
-            placeholder="Enter subtitle"
-          />
-        </div>
+          {/* adivor belongs  */}
+<div className="space-y-2">
+  <Label>Council Belongs To</Label>
+  <Input
+    value={formattedPath(pathnames[pathnames.length - 1])}
+    readOnly
+    className="bg-gray-100 cursor-not-allowed"
+  />
+</div>
 
-        <div className="space-y-2">
-        <Label>Upload Advisors Company Logo Image</Label>
-        <FileUploader/>
-        </div>
+          {/* Title */}
+          <div className="space-y-2">
+            <Label>Advisors Name</Label>
+            <Input
+              placeholder="Enter program title"
+            />
+          </div>
 
-        {/* Save Button */}
-        <div className="pt-2">
-          <Button onClick={() => console.log("Saved Data:", data)}>
-            Save Changes
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          {/* Subtitle */}
+          <div className="space-y-2">
+            <Label>Advisors Professional</Label>
+            <Input
+              placeholder="Enter subtitle"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Advisors Linkedin URL</Label>
+            <Input
+              placeholder="Enter subtitle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Upload Advisors Company Logo Image</Label>
+            <FileUploader />
+          </div>
+
+          {/* Save Button */}
+          <div className="pt-2">
+            <Button onClick={() => console.log("Saved Data:", data)}>
+              Save Changes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
