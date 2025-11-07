@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,70 +32,81 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useToast } from "@/components/ui/use-toast";
 import { DatePicker } from "../components/ui/DatePicker";
-
+import { createEvent, getAllEvents, getEventById, updateEvent, deleteEvent } from "@/Api/UpcommingEventsApi";
 const UpcomingEventsPage = () => {
   const { toast } = useToast();
 
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      date: "15 Sept",
-      title: "Masterclass: Navigating the Global Corporate Landscape",
-      description:
-        "Led by global CXOs, this session will cover leadership agility and market expansion strategies.",
-      category: "LATEST",
-      exploreLink: "#",
-      applyLink: "#",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
 
   const [newEvent, setNewEvent] = useState({
     date: "",
-    title: "",
-    description: "",
     category: "",
+    eventTitle: "",
+    eventDesc: "",
     exploreLink: "",
     applyLink: "",
   });
 
   const [editEvent, setEditEvent] = useState(null);
 
-  const handleAdd = () => {
-    if (
-      !newEvent.date ||
-      !newEvent.title ||
-      !newEvent.description ||
-      !newEvent.category
-    ) {
-      toast({
-        title: "Error",
-        description: "Please fill all required fields.",
-        variant: "error",
-      });
-      return;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getAllEvents()
+        setEvents(res.data || res)
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to fetch data" })
+      }
     }
+    fetchData()
+  }, [])
 
-    setEvents([...events, { id: Date.now(), ...newEvent }]);
-    setNewEvent({
-      date: "",
-      title: "",
-      description: "",
-      category: "",
-      exploreLink: "",
-      applyLink: "",
-    });
-    toast({ title: "Added", description: "New event added successfully." });
+  const handleAdd = async () => {
+    const { date, category, eventTitle, eventDesc, exploreLink, applyLink } = newEvent
+    if (!date || !category || !eventTitle || !eventDesc || !exploreLink || !applyLink) {
+      toast({ title: "Error", description: "All fields are required" })
+      return
+    }
+    try {
+      const res = await createEvent(newEvent)
+      setEvents([...events, res.data || res])
+      setNewEvent({
+        date: "",
+        category: "",
+        eventTitle: "",
+        eventDesc: "",
+        exploreLink: "",
+        applyLink: "",
+      })
+      toast({ title: "Success", description: "Data added successfully" })
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add data" })
+    }
   };
 
-  const handleDelete = (id) => {
-    setEvents(events.filter((e) => e.id !== id));
-    toast({ title: "Deleted", description: "Event removed successfully." });
+  const handleDelete = async (id) => {
+    try {
+      await deleteEvent(id)
+      setEvents(events.filter((data) =>
+        data._id !== id
+      ))
+      toast({ title: "Success", description: "Data deleted successfully" })
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete data" })
+    }
   };
 
-  const handleEdit = () => {
-    setEvents(events.map((e) => (e.id === editEvent.id ? editEvent : e)));
-    setEditEvent(null);
-    toast({ title: "Updated", description: "Event updated successfully." });
+  const handleEdit = async () => {
+    try {
+      const res = await updateEvent(editEvent._id, editEvent)
+      setEvents(events.map((data) =>
+        data._id === editEvent._id ? res.data || res : events
+      ))
+      toast({ title: "Success", description: "Data updated  successfully" })
+      setEditEvent(null)
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update data" })
+    }
   };
 
   return (
@@ -156,30 +167,30 @@ const UpcomingEventsPage = () => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
-                  <SelectItem value="Exam">Exam</SelectItem>
-                  <SelectItem value="Admission">Admission</SelectItem>
-                  <SelectItem value="Holiday">Holiday</SelectItem>
+                  <SelectItem value="exam">Exam</SelectItem>
+                  <SelectItem value="admission">Admission</SelectItem>
+                  <SelectItem value="holiday">Holiday</SelectItem>
                   {/* Add more categories as needed */}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-            {/* Event Title Input */}
-            <Input
-              placeholder="Event Title"
-              value={newEvent.title}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, title: e.target.value })
-              }
-              className="w-full"
-            />
+          {/* Event Title Input */}
+          <Input
+            placeholder="Event Title"
+            value={newEvent.eventTitle}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, eventTitle: e.target.value })
+            }
+            className="w-full"
+          />
 
           <Textarea
             placeholder="Event Description"
-            value={newEvent.description}
+            value={newEvent.eventDesc}
             onChange={(e) =>
-              setNewEvent({ ...newEvent, description: e.target.value })
+              setNewEvent({ ...newEvent, eventDesc: e.target.value })
             }
           />
           <div className="grid md:grid-cols-2 gap-3">
@@ -212,9 +223,9 @@ const UpcomingEventsPage = () => {
               <CalendarDays className="w-12 h-12 text-muted-foreground inline-block" />
               <CardTitle
                 className="text-base font-semibold flex items-center gap-2 truncate"
-                title={event.title}
+                title={event.eventTitle}
               >
-                {event.title}
+                {event.eventTitle}
               </CardTitle>
               <div className="flex gap-2">
                 <Dialog>
@@ -227,13 +238,13 @@ const UpcomingEventsPage = () => {
                       <Pencil className="w-4 h-4" />
                     </Button>
                   </DialogTrigger>
-                  {editEvent?.id === event.id && (
+                  {editEvent?._id === event._id && (
                     <DialogContent className="sm:max-w-md">
                       <DialogHeader>
                         <DialogTitle>Edit Event</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-3 mt-3">
-                        {editEvent?.id === event.id && (
+                        {editEvent?._id === event._id && (
                           <DatePicker
                             value={editEvent.date}
                             onChange={(date) =>
@@ -254,32 +265,32 @@ const UpcomingEventsPage = () => {
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Exam">Exam</SelectItem>
-                              <SelectItem value="Admission">
+                              <SelectItem value="exam">Exam</SelectItem>
+                              <SelectItem value="admission">
                                 Admission
                               </SelectItem>
-                              <SelectItem value="Holiday">Holiday</SelectItem>
+                              <SelectItem value="holiday">Holiday</SelectItem>
                               {/* Add more categories as needed */}
                             </SelectContent>
                           </Select>
                         </div>
                         <Input
                           placeholder="Title"
-                          value={editEvent.title}
+                          value={editEvent.eventTitle}
                           onChange={(e) =>
                             setEditEvent({
                               ...editEvent,
-                              title: e.target.value,
+                              eventTitle: e.target.value,
                             })
                           }
                         />
                         <Textarea
                           placeholder="Description"
-                          value={editEvent.description}
+                          value={editEvent.eventDesc}
                           onChange={(e) =>
                             setEditEvent({
                               ...editEvent,
-                              description: e.target.value,
+                              eventDesc: e.target.value,
                             })
                           }
                         />
@@ -311,7 +322,7 @@ const UpcomingEventsPage = () => {
                 <Button
                   variant="destructive"
                   size="icon"
-                  onClick={() => handleDelete(event.id)}
+                  onClick={() => handleDelete(event._id)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -322,7 +333,7 @@ const UpcomingEventsPage = () => {
               <p className="text-sm font-medium text-muted-foreground">
                 {event.date} • {event.category}
               </p>
-              <p className="text-sm">{event.description}</p>
+              <p className="text-sm">{event.eventDesc}</p>
               <div className="flex gap-2 mt-2">
                 {event.exploreLink && (
                   <Button variant="outline" asChild>
