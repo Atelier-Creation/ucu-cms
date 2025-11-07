@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,26 +16,18 @@ import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import { Trash2, Pencil, PanelsTopLeft, Youtube } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-
+import { createAspirant, getAllAspirants, getAspirantById, deleteAspirant, updateAspirant } from "@/Api/AspirantApi"
 const AspirantsParentsPage = () => {
   const { toast } = useToast()
   const [aspirants, setAspirants] = useState([
-    {
-      id: 1,
-      videoUrl: "https://youtu.be/ulaQhIpWY98",
-      thumbnail: "https://th.bing.com/th/id/R.3bcbeff4ee0abb81ef150c9ea7e35730?rik=t3aMo1m4uUQi6g&riu=http%3a%2f%2fwww.newdesignfile.com%2fpostpic%2f2010%2f05%2ffree-stock-photos-people_102217.jpg&ehk=vGjIrntn5QyP%2fIXY2Ei7Iiz4%2fy%2byXvP8I8j0XxemwjI%3d&risl=&pid=ImgRaw&r=0",
-      author: "Vikram Sethi",
-      proffection: "Chief Human Resources Officer, Global Dynamics",
-      para: "UCU is cultivating the next generation of business leaders through practical, industry-focused learning.",
-    },
   ])
 
   const [newItem, setNewItem] = useState({
-    videoUrl: "",
-    thumbnail: "",
+    VideoUrl: "",
+    thumbNailUrl: "",
     author: "",
-    proffection: "",
-    para: "",
+    authorProf: "",
+    authorDesc: "",
   })
 
   const [editItem, setEditItem] = useState(null)
@@ -47,26 +39,66 @@ const AspirantsParentsPage = () => {
     return match ? `https://www.youtube.com/embed/${match[1]}` : ""
   }
 
-  const handleAdd = () => {
-    if (!newItem.videoUrl || !newItem.thumbnail || !newItem.author || !newItem.proffection || !newItem.para) {
-      toast({ title: "Error", description: "Please fill all fields.", variant: "error" })
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getAllAspirants()
+        setAspirants(res.data || res)
+      } catch (error) {
+        toast({ title: "Error", description: "failed to fetch data" })
+      }
+    }
+    fetchData()
+  }, [])
+  const handleAdd = async () => {
+    const { VideoUrl, author, authorDesc, authorProf, thumbNailUrl } = newItem
+    if (!VideoUrl || !author || !authorDesc || !authorProf || !thumbNailUrl) {
+      toast({ title: "Error", description: "All Fields Are Required" })
       return
     }
+    try {
+      const res = await createAspirant(newItem)
+      setAspirants([...aspirants, res.data || res])
+      setNewItem({
+        VideoUrl: "",
+        author: "",
+        authorDesc: "",
+        authorProf: "",
+        thumbNailUrl: ""
+      })
 
-    setAspirants([...aspirants, { id: Date.now(), ...newItem }])
-    setNewItem({ videoUrl: "", thumbnail: "", author: "", proffection: "", para: "" })
-    toast({ title: "Added", description: "New aspirant added successfully." })
+      toast({ title: "Success", description: "Aspirant data added successfully" })
+    } catch (error) {
+      toast({ title: "Error", description: "failed to add data" })
+    }
   }
 
-  const handleDelete = (id) => {
-    setAspirants(aspirants.filter((a) => a.id !== id))
-    toast({ title: "Deleted", description: "Aspirant removed successfully." })
+  const handleDelete = async (id) => {
+    try {
+      await deleteAspirant(id)
+setAspirants(aspirants.filter((data) => data._id !== id))
+
+      toast({ title: "Success", description: "Deleted data successfully" })
+    } catch (error) {
+      toast({ title: "Error", description: "failed to delete data" })
+    }
   }
 
-  const handleEdit = () => {
-    setAspirants(aspirants.map((a) => (a.id === editItem.id ? editItem : a)))
-    setEditItem(null)
-    toast({ title: "Updated", description: "Aspirant details updated successfully." })
+  const handleEdit = async () => {
+    try {
+      const res = await updateAspirant(editItem._id, editItem)
+      setAspirants(
+        aspirants.map((data) =>
+          data._id === editItem._id ? res.data || res : data
+        )
+      )
+
+      setEditItem(null)
+      toast({ title: "Success", description: "Updated data successfully" })
+
+    } catch (error) {
+      toast({ title: "Error", description: "failed to update data" })
+    }
   }
 
   return (
@@ -108,13 +140,13 @@ const AspirantsParentsPage = () => {
         <CardContent className="space-y-3">
           <Input
             placeholder="YouTube Video Link"
-            value={newItem.videoUrl}
-            onChange={(e) => setNewItem({ ...newItem, videoUrl: e.target.value })}
+            value={newItem.VideoUrl}
+            onChange={(e) => setNewItem({ ...newItem, VideoUrl: e.target.value })}
           />
           <Input
             placeholder="Thumbnail URL"
-            value={newItem.thumbnail}
-            onChange={(e) => setNewItem({ ...newItem, thumbnail: e.target.value })}
+            value={newItem.thumbNailUrl}
+            onChange={(e) => setNewItem({ ...newItem, thumbNailUrl: e.target.value })}
           />
           <Input
             placeholder="Author Name"
@@ -123,13 +155,13 @@ const AspirantsParentsPage = () => {
           />
           <Input
             placeholder="Profession"
-            value={newItem.proffection}
-            onChange={(e) => setNewItem({ ...newItem, proffection: e.target.value })}
+            value={newItem.authorProf}
+            onChange={(e) => setNewItem({ ...newItem, authorProf: e.target.value })}
           />
           <Textarea
-            placeholder="Write paragraph..."
-            value={newItem.para}
-            onChange={(e) => setNewItem({ ...newItem, para: e.target.value })}
+            placeholder="Write description..."
+            value={newItem.authorDesc}
+            onChange={(e) => setNewItem({ ...newItem, authorDesc: e.target.value })}
           />
           <Button onClick={handleAdd} className="w-fit">
             Add Aspirant
@@ -140,11 +172,11 @@ const AspirantsParentsPage = () => {
       {/* Aspirant List */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {aspirants.map((item) => (
-          <Card key={item.id} className="hover:shadow-md transition-shadow overflow-hidden">
+          <Card key={item._id} className="hover:shadow-md transition-shadow overflow-hidden">
             <div className="aspect-video bg-gray-100 relative">
               <iframe
                 className="absolute inset-0 w-full h-full"
-                src={getEmbedUrl(item.videoUrl)}
+                src={getEmbedUrl(item.VideoUrl)}
                 title="Aspirant Video"
                 allowFullScreen
               />
@@ -158,7 +190,7 @@ const AspirantsParentsPage = () => {
                       <Pencil className="w-4 h-4" />
                     </Button>
                   </DialogTrigger>
-                  {editItem?.id === item.id && (
+                  {editItem?._id === item._id && (
                     <DialogContent className="sm:max-w-md">
                       <DialogHeader>
                         <DialogTitle>Edit Aspirant</DialogTitle>
@@ -166,13 +198,13 @@ const AspirantsParentsPage = () => {
                       <div className="space-y-3 mt-3">
                         <Input
                           placeholder="YouTube Video Link"
-                          value={editItem.videoUrl}
-                          onChange={(e) => setEditItem({ ...editItem, videoUrl: e.target.value })}
+                          value={editItem.VideoUrl}
+                          onChange={(e) => setEditItem({ ...editItem, VideoUrl: e.target.value })}
                         />
                         <Input
                           placeholder="Thumbnail URL"
-                          value={editItem.thumbnail}
-                          onChange={(e) => setEditItem({ ...editItem, thumbnail: e.target.value })}
+                          value={editItem.thumbNailUrl}
+                          onChange={(e) => setEditItem({ ...editItem, thumbNailUrl: e.target.value })}
                         />
                         <Input
                           placeholder="Author"
@@ -181,32 +213,32 @@ const AspirantsParentsPage = () => {
                         />
                         <Input
                           placeholder="Profession"
-                          value={editItem.proffection}
-                          onChange={(e) => setEditItem({ ...editItem, proffection: e.target.value })}
+                          value={editItem.authorProf}
+                          onChange={(e) => setEditItem({ ...editItem, authorProf: e.target.value })}
                         />
                         <Textarea
-                          placeholder="Paragraph"
-                          value={editItem.para}
-                          onChange={(e) => setEditItem({ ...editItem, para: e.target.value })}
+                          placeholder="Description"
+                          value={editItem.authorDesc}
+                          onChange={(e) => setEditItem({ ...editItem, authorDesc: e.target.value })}
                         />
                         <Button onClick={handleEdit}>Save Changes</Button>
                       </div>
                     </DialogContent>
                   )}
                 </Dialog>
-                <Button variant="destructive" size="icon" onClick={() => handleDelete(item.id)}>
+                <Button variant="destructive" size="icon" onClick={() => handleDelete(item._id)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
               <img
-                src={item.thumbnail}
+                src={item.thumbNailUrl}
                 alt={item.author}
                 className="rounded-md border w-full h-40 object-cover"
               />
-              <p className="text-sm font-medium text-foreground">{item.proffection}</p>
-              <p className="text-sm text-muted-foreground">{item.para}</p>
+              <p className="text-sm font-medium text-foreground">{item.authorProf}</p>
+              <p className="text-sm text-muted-foreground">{item.authorDesc}</p>
             </CardContent>
           </Card>
         ))}
