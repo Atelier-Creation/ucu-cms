@@ -8,257 +8,107 @@ import { ChevronsRight, Plus, Trash2 } from "lucide-react";
 import EditableTable from "./EditableTable";
 import EditorMock from "../EditorMock";
 
-export default function CurriculumEditor({
-  mode = "create", // "create" | "edit"
-  initialData = null,
-  onSave,
-  onNext,
-}) {
-  const [curriculum, setCurriculum] = useState({
-    heading: "PGDM Curriculum and Programme Structure",
-    intro:
-      "A new-age curriculum co-created with the Industry, keeping corporate needs and employability at the forefront.",
-    years: [
-      {
-        title: "Year 1",
-        points: [
-          "Core management foundation courses",
-          // "Experiential learning: ADMAP, Abhyudaya, DoCC, SOS",
-          // "Corporate internship preparation",
-        ],
-      },
-      {
-        title: "Year 2",
-        points: [
-          "Major and minor specializations",
-          "Corporate internships and electives",
-          "Global Fast Track (GFT) immersion module",
-        ],
-      },
-    ],
-    majors: [
-      "Operations & Supply Chain",
-      "Information Management",
-      "Marketing",
-      "Finance",
-      "HR & OB",
-      "Business Analytics & AI",
-    ],
-    minors: ["Fin-Tech", "GCC", "Consulting", "Manufacturing", "Semiconductor"],
-  });
+export default function CurriculumEditor({ mode = "create", sections: initialSections = [], onSave, onNext }) {
+  const [sections, setSections] = useState(initialSections);
 
-  // Load data in edit mode
   useEffect(() => {
-    if (initialData) {
-      setCurriculum((prev) => ({ ...prev, ...initialData }));
+    if (initialSections) setSections(initialSections);
+  }, [initialSections]);
+
+  const handleSectionChange = (index, value) => {
+    const updated = [...sections];
+    updated[index].contentData = value;
+    setSections(updated);
+  };
+
+  const addListItem = (sectionIndex) => {
+    const updated = [...sections];
+    if (!Array.isArray(updated[sectionIndex].contentData)) {
+      updated[sectionIndex].contentData = [];
     }
-  }, [initialData]);
-
-  const handleFieldChange = (field, value) => {
-    setCurriculum((prev) => ({ ...prev, [field]: value }));
+    updated[sectionIndex].contentData.push("New Item");
+    setSections(updated);
   };
 
-  const handleYearChange = (index, key, value) => {
-    const updatedYears = [...curriculum.years];
-    updatedYears[index][key] = value;
-    setCurriculum((prev) => ({ ...prev, years: updatedYears }));
-  };
-
-  const addYear = () => {
-    setCurriculum((prev) => ({
-      ...prev,
-      years: [...prev.years, { title: "New Year", points: [] }],
-    }));
-  };
-
-  const removeYear = (index) => {
-    const updatedYears = curriculum.years.filter((_, i) => i !== index);
-    setCurriculum((prev) => ({ ...prev, years: updatedYears }));
-  };
-
-  const addPoint = (yearIndex) => {
-    const updatedYears = [...curriculum.years];
-    updatedYears[yearIndex].points.push("New point");
-    setCurriculum((prev) => ({ ...prev, years: updatedYears }));
-  };
-
-  const removePoint = (yearIndex, pointIndex) => {
-    const updatedYears = [...curriculum.years];
-    updatedYears[yearIndex].points = updatedYears[yearIndex].points.filter(
-      (_, i) => i !== pointIndex
-    );
-    setCurriculum((prev) => ({ ...prev, years: updatedYears }));
+  const removeListItem = (sectionIndex, itemIndex) => {
+    const updated = [...sections];
+    updated[sectionIndex].contentData = updated[sectionIndex].contentData.filter((_, i) => i !== itemIndex);
+    setSections(updated);
   };
 
   const handleSave = () => {
-    console.log(`${mode === "edit" ? "Updating" : "Saving"} curriculum:`, curriculum);
-
-    if (onSave) onSave(curriculum);
-
+    console.log(`${mode === "edit" ? "Updating" : "Saving"} curriculum:`, sections);
+    if (onSave) onSave(sections);
     if (mode === "create" && onNext) onNext();
   };
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold">
-        {mode === "edit" ? "Edit Curriculum" : "Curriculum Editor"}
-      </h1>
+      <h1 className="text-2xl font-bold">{mode === "edit" ? "Edit Curriculum" : "Curriculum Editor"}</h1>
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          {/* Heading */}
-          <div>
-            <label className="block font-medium mb-1">Heading</label>
-            <Input
-              value={curriculum.heading}
-              onChange={(e) => handleFieldChange("heading", e.target.value)}
-            />
-          </div>
+          {sections.map((section, index) => (
+            <div key={section._id || index} className="mb-4">
+              <label className="block font-medium mb-1">{section.title}</label>
 
-          {/* Introduction */}
-          <div>
-            <label className="block font-medium mb-1">Introduction</label>
-            <Textarea
-              rows={3}
-              value={curriculum.intro}
-              onChange={(e) => handleFieldChange("intro", e.target.value)}
-            />
-          </div>
+              {section.contentType === "text" && (
+                <Input
+                  value={section.contentData}
+                  onChange={(e) => handleSectionChange(index, e.target.value)}
+                  placeholder={`Enter ${section.title}`}
+                />
+              )}
 
-          <Separator />
-
-          {/* Programme Years */}
-          <h2 className="text-lg font-semibold mt-4">Programme Years</h2>
-          {curriculum.years.map((year, yIndex) => (
-            <Card key={yIndex} className="mt-3">
-              <CardContent className="space-y-3 px-3">
-                <div className="text-right">
+              {section.contentType === "list" && (
+                <div className="space-y-2">
+                  {section.contentData.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => {
+                          const updatedList = [...section.contentData];
+                          updatedList[i] = e.target.value;
+                          handleSectionChange(index, updatedList);
+                        }}
+                      />
+                      <Button variant="ghost" size="icon" onClick={() => removeListItem(index, i)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeYear(yIndex)}
-                    title="Remove Year"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => addListItem(index)}
+                    className="mt-1"
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Plus className="inline-block mr-1 w-4 h-4" />
+                    Add Item
                   </Button>
                 </div>
+              )}
 
-                <div className="flex items-center justify-between">
+              {section.contentType === "table" && <EditableTable initialData={section.contentData} onChange={(data) => handleSectionChange(index, data)} />}
+
+              {section.contentType === "image" && (
+                <div className="space-y-2">
                   <Input
-                    value={year.title}
-                    onChange={(e) =>
-                      handleYearChange(yIndex, "title", e.target.value)
-                    }
-                    placeholder="Year title"
+                    value={section.contentData}
+                    onChange={(e) => handleSectionChange(index, e.target.value)}
+                    placeholder="Paste image URL"
                   />
+                  {section.contentData && <img src={section.contentData} className="rounded-lg border mt-2" alt="Preview" />}
                 </div>
-                  <EditorMock/>
-                {/* {year.points.map((p, pIndex) => (
-                  <div key={pIndex} className="flex items-center ml-6">
-                    <Input
-                      className="mt-2 w-[95%]"
-                      value={p}
-                      onChange={(e) => {
-                        const updated = [...year.points];
-                        updated[pIndex] = e.target.value;
-                        handleYearChange(yIndex, "points", updated);
-                      }}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removePoint(yIndex, pIndex)}
-                      title="Remove Point"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                ))} */}
+              )}
 
-                <EditableTable/>
-
-                {/* <Button
-                  className="bg-gray-700 hover:bg-gray-900 text-white cursor-pointer rounded-sm"
-                  onClick={() => addPoint(yIndex)}
-                >
-                  <Plus className="inline-block text-white" />
-                  Add Point
-                </Button> */}
-              </CardContent>
-            </Card>
+              <Separator />
+            </div>
           ))}
 
-          <Button
-            className="bg-gray-700 hover:bg-gray-900 text-white cursor-pointer rounded-sm"
-            onClick={addYear}
-          >
-            <Plus className="inline-block text-white" />
-            Add Year
-          </Button>
-
-          <Separator />
-
-          {/* Majors */}
-          <h2 className="text-lg font-semibold mt-4">Majors</h2>
-          {curriculum.majors.map((m, i) => (
-            <Input
-              key={i}
-              className="mb-2"
-              value={m}
-              onChange={(e) => {
-                const updated = [...curriculum.majors];
-                updated[i] = e.target.value;
-                setCurriculum((prev) => ({ ...prev, majors: updated }));
-              }}
-            />
-          ))}
-          <Button
-            className="bg-gray-700 hover:bg-gray-900 text-white cursor-pointer rounded-sm"
-            onClick={() =>
-              setCurriculum((prev) => ({
-                ...prev,
-                majors: [...prev.majors, "New Major"],
-              }))
-            }
-          >
-            <Plus className="inline-block text-white" />
-            Add Major
-          </Button>
-
-          <Separator />
-
-          {/* Minors */}
-          <h2 className="text-lg font-semibold mt-4">Minors</h2>
-          {curriculum.minors.map((m, i) => (
-            <Input
-              key={i}
-              className="mb-2"
-              value={m}
-              onChange={(e) => {
-                const updated = [...curriculum.minors];
-                updated[i] = e.target.value;
-                setCurriculum((prev) => ({ ...prev, minors: updated }));
-              }}
-            />
-          ))}
-          <Button
-            className="bg-gray-700 hover:bg-gray-900 text-white cursor-pointer rounded-sm"
-            onClick={() =>
-              setCurriculum((prev) => ({
-                ...prev,
-                minors: [...prev.minors, "New Minor"],
-              }))
-            }
-          >
-            <Plus className="inline-block text-white" />
-            Add Minor
-          </Button>
-
-          {/* Footer */}
           <div className="text-right mt-6">
             <Button onClick={handleSave}>
-              {mode === "edit" ? "Save Changes" : "Next"}{" "}
-              {mode === "create" &&  <ChevronsRight />}
+              {mode === "edit" ? "Save Changes" : "Next"} {mode === "create" && <ChevronsRight />}
             </Button>
           </div>
         </CardContent>

@@ -51,7 +51,7 @@ function FlexiProgram() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold text-foreground">
-                    Full Time Programs
+                    Flexi Programs
                 </h1>
                 <div className="ml-2 text-right">
                     <Dialog open={open} onOpenChange={setOpen} className='bg-white'>

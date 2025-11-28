@@ -85,11 +85,11 @@ export default function AdmissionsEditor({
         {mode === "edit" ? "Edit Admissions" : "Admissions Editor"}
       </h2>
 
-      <Card>
-        <CardContent className="space-y-4 p-4">
+      <Card className='bg-transparent border-0 shadow-none'>
+        <CardContent className="space-y-4 p-0">
           {/* Heading */}
           <div>
-            <Label className="mb-1 block">Heading</Label>
+            <Label className="mb-2 block">Heading</Label>
             <Input
               value={data.heading}
               disabled={isViewMode}
@@ -100,7 +100,7 @@ export default function AdmissionsEditor({
 
           {/* Description */}
           <div>
-            <Label className="mb-1 block">Description</Label>
+            <Label className="mb-2 block">Description</Label>
             <Textarea
               rows={3}
               disabled={isViewMode}

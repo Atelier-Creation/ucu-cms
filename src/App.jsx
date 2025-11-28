@@ -55,7 +55,7 @@ function App() {
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/program/fulltime/:slug"
+            path="/program/fulltime/:slug/:id"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/program/flexi/*" element={<ProgramEditor />} /> */}
@@ -64,7 +64,7 @@ function App() {
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/program/flexi/:slug"
+            path="/program/flexi/:slug/:id"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/program/epgcp/functional-certifications/*" element={<ProgramEditor />} /> */}
@@ -73,7 +73,7 @@ function App() {
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/programs/Executive-Post-Graduate-Certificate-Programmes/:slug"
+            path="/programs/Executive-Post-Graduate-Certificate-Programmes/:slug/:id"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/programs/crpfw/career-for-womens/*" element={<ProgramEditor />} /> */}
@@ -82,7 +82,7 @@ function App() {
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/programs/Career-Reboot-Program-for-Women/:slug"
+            path="/programs/Career-Reboot-Program-for-Women/:slug/:id"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/programs/Industry-Sector-Specialization/career-for-womens/*" element={<ProgramEditor />} /> */}
@@ -91,7 +91,7 @@ function App() {
             element={<ProgramEditor mode="create" />}
           />
           <Route
-            path="/program/Industry-Sector-Specialization/:slug"
+            path="/program/Industry-Sector-Specialization/:slug/:id"
             element={<ProgramEditor mode="edit" />}
           />
           {/* <Route path="/users" element={<Users />} /> */}

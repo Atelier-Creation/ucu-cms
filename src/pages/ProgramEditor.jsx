@@ -17,7 +17,8 @@ import PlacementEditor from "@/components/Programcms/PlacementEditor";
 import ProgramHeaderEditor from "@/components/Programcms/ProgramHeaderEditor";
 import { Label } from "@/components/ui/label";
 import { PanelsTopLeft } from "lucide-react";
-import { useLocation, useParams, Link } from "react-router-dom";
+import { useLocation, Link, useParams } from "react-router-dom";
+import { createProgram, getProgramById, updateProgram } from "@/Api/programApi";
 
 export default function ProgramEditor({
   mode = "create", // "create" | "edit"
@@ -27,22 +28,37 @@ export default function ProgramEditor({
 }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [programData, setProgramData] = useState(initialData || {});
-const location = useLocation();
-const params = useParams();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+  const { id: paramId } = useParams();
+  const programId  = location.state?.programId || paramId;
+console.log(programId,mode);
+  useEffect(() => {
+  if (mode === "edit" && programId) {
+    setLoading(true);
+    getProgramById(programId)
+      .then((data) => {
+        console.log(data)
+        setProgramData(data);
+      })
+      .catch((err) => console.error("Error loading program:", err))
+      .finally(() => setLoading(false));
+  }
+}, [mode, programId]);
 
-const excludedSegments = ["program", "fulltime",];
+  const excludedSegments = ["program", "fulltime"];
 
-const pathnames = location.pathname
-  .split("/")
-  .filter(Boolean)
-  .filter(segment => !excludedSegments.includes(segment.toLowerCase()));
-// Example: ["program", "fulltime", "pgdm"]
+  const pathnames = location.pathname
+    .split("/")
+    .filter(Boolean)
+    .filter((segment) => !excludedSegments.includes(segment.toLowerCase()));
+  // Example: ["program", "fulltime", "pgdm"]
 
-const formattedPath = (segment) => {
-  return segment
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-};
+  const formattedPath = (segment) => {
+    return segment
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
   useEffect(() => {
     if (initialData) setProgramData(initialData);
   }, [initialData]);
@@ -56,52 +72,65 @@ const formattedPath = (segment) => {
     }));
   };
 
-  const handleSubmit = () => {
-    if (onSave) onSave(programData);
-    else console.log("Program data saved:", programData);
+  const handleSubmit = async () => {
+    try {
+      if (mode === "edit") {
+        await updateProgram(programId, programData);
+        alert("Program updated successfully ✅");
+      } else {
+        await createProgram(programData);
+        alert("Program created successfully ✅");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong!");
+    }
   };
+  const overviewData = programData.tabs?.find(tab => tab.tabName === "Overview");
+const curriculumData = programData.tabs?.find(tab => tab.tabName === "Curriculum");
+const feesData = programData.tabs?.find(tab => tab.tabName === "Fees Structure");
+
 
   return (
     <div className="space-y-6 px-1 sm:px-6">
       {/* Breadcrumb */}
       <div className="overflow-x-auto">
-<Breadcrumb className="min-w-max sm:min-w-0">
-  <BreadcrumbList>
-    <BreadcrumbItem>
-      <BreadcrumbLink asChild>
-        <Link to="/">
-          <PanelsTopLeft className="w-4 h-4 inline-block mr-1" />
-          Home
-        </Link>
-      </BreadcrumbLink>
-    </BreadcrumbItem>
-
-    {pathnames.map((segment, index) => {
-      const routeTo = "/" + pathnames.slice(0, index + 1).join("/");
-      const isLast = index === pathnames.length - 1;
-
-      return (
-        <React.Fragment key={index}>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            {isLast ? (
-              <BreadcrumbPage>
-                {mode === "edit" && initialData?.title
-                  ? initialData.title
-                  : formattedPath(segment)}
-              </BreadcrumbPage>
-            ) : (
+        <Breadcrumb className="min-w-max sm:min-w-0">
+          <BreadcrumbList>
+            <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to={routeTo}>{formattedPath(segment)}</Link>
+                <Link to="/">
+                  <PanelsTopLeft className="w-4 h-4 inline-block mr-1" />
+                  Home
+                </Link>
               </BreadcrumbLink>
-            )}
-          </BreadcrumbItem>
-        </React.Fragment>
-      );
-    })}
-  </BreadcrumbList>
-</Breadcrumb>
+            </BreadcrumbItem>
 
+            {pathnames.map((segment, index) => {
+              const routeTo = "/" + pathnames.slice(0, index + 1).join("/");
+              const isLast = index === pathnames.length - 1;
+
+              return (
+                <React.Fragment key={index}>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage>
+                        {mode === "edit" && initialData?.title
+                          ? initialData.title
+                          : formattedPath(segment)}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link to={routeTo}>{formattedPath(segment)}</Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       {/* Header */}
@@ -116,8 +145,8 @@ const formattedPath = (segment) => {
 
       {/* Program Header Section */}
       <ProgramHeaderEditor
-        mode={mode}
-        initialData={programData?.header}
+        initialData={programData}
+        loading={loading}
         onSave={(data) => handleSectionSave("header", data)}
       />
 
@@ -147,8 +176,8 @@ const formattedPath = (segment) => {
                   className="
                     flex sm:grid sm:grid-cols-5 
                     w-max sm:w-[90%] mx-auto sm:mx-10 
-                    bg-gray-100 dark:bg-black/0 px-4 sm:px-6 
-                    whitespace-nowrap
+                    bg-gray-100 dark:bg-black/0 px-4 sm:px-2 
+                    whitespace-nowrap h-12 mb-2 gap-4
                   "
                 >
                   <TabsTrigger
@@ -192,7 +221,8 @@ const formattedPath = (segment) => {
               <TabsContent value="overview">
                 <OverviewEditor
                   mode={mode}
-                  initialData={programData?.overview}
+                  sections={overviewData?.sections || []}
+                  loading={loading}
                   onNext={() => handleNextTab("curriculum")}
                   onSave={(data) => handleSectionSave("overview", data)}
                 />
@@ -201,7 +231,7 @@ const formattedPath = (segment) => {
               <TabsContent value="curriculum">
                 <CurriculumEditor
                   mode={mode}
-                  initialData={programData?.curriculum}
+                  sections={curriculumData?.sections || []}
                   onNext={() => handleNextTab("fees")}
                   onSave={(data) => handleSectionSave("curriculum", data)}
                 />
@@ -210,7 +240,7 @@ const formattedPath = (segment) => {
               <TabsContent value="fees">
                 <FeeStructureEditor
                   mode={mode}
-                  initialData={programData?.fees}
+                  sections={feesData?.sections}
                   onNext={() => handleNextTab("admissions")}
                   onSave={(data) => handleSectionSave("fees", data)}
                 />

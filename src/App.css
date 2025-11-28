@@ -7,10 +7,12 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Only affects the sidebar */
+/* Firefox */
 .sidebar-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #e9f2f7 transparent;
+  scrollbar-color: #a0aec0 transparent;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 /* Chrome, Edge, Safari */
@@ -18,18 +20,23 @@ body {
   width: 2px;
 }
 
-/* Create top & bottom spacing for scrollbar track */
 .sidebar-scroll::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 8px 0; /* adds space above and below the scrollbar */
+  background: #d4d4d4d2;
+  margin: 8px 0;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
   background: #a0aec0;
   border-radius: 4px;
-  min-height: 20px; /* ensures it's not too tiny */
+  min-height: 20px;
 }
 
+/* STOP hover color change */
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: #718096;
+  background: #a0aec0;  /* SAME as normal */
+}
+
+/* STOP click color change */
+.sidebar-scroll::-webkit-scrollbar-thumb:active {
+  background: #a0aec0;
 }

@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -26,6 +26,7 @@ import { useState } from "react";
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const { pathname } = useLocation();
   const [openMenu, setOpenMenu] = useState(null);
+  const navigate = useNavigate()
 
   const links = [
     { to: "/", label: "Dashboard", icon: Home },

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Home, Mic, GraduationCap, Pencil, ChevronsRight } from "lucide-react";
+import { GraduationCap, Pencil, ChevronsRight } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -16,34 +16,50 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-const iconMap = { Home, Mic, GraduationCap };
+import { getAllPrograms } from "@/Api/programApi";
+import FileUploader from "@/lib/FileUploader";
 
-const fullTimeProgramsData = [
-  {
-    icon: "GraduationCap",
-    pageTitle: "Full Time Programs",
-    sections: [
-      {
-        header: "Programs",
-        submenu: [
-          { label: "PGPM-ELITE", link: "/program/fulltime/pgpm-elite" },
-          { label: "PGDM", link: "/program/fulltime/pgdm" },
-        ],
-      },
-    ],
-  },
-];
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
 
 function FullTimePrograms() {
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
-  const [selectedType, setSelectedType] = React.useState("fulltime");
+
+  const [open, setOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState("fulltime");
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+
+  const handleUploaded = (files) => {
+    console.log("Uploaded files:", files);
+    setUploadedFiles(files); 
+  };
+
+  // ✅ Fetch programs
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const data = await getAllPrograms();
+
+        // assuming all returned are full-time
+        setPrograms(data);
+      } catch (err) {
+        console.error("Error fetching programs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -52,158 +68,170 @@ function FullTimePrograms() {
         <h1 className="text-2xl font-semibold text-foreground">
           Full Time Programs
         </h1>
-        <div className="ml-2 text-right">
-          <Dialog open={open} onOpenChange={setOpen} className='bg-white'>
-            <DialogTrigger asChild>
-              <Button>Add Program</Button>
-            </DialogTrigger>
 
-            <DialogContent className="max-w-sm bg-white">
-              <DialogHeader>
-                <DialogTitle>Select Program Type</DialogTitle>
-              </DialogHeader>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>Add Program</Button>
+          </DialogTrigger>
 
-              <div className="py-4">
-                <RadioGroup
-                  value={selectedType}
-                  onValueChange={setSelectedType}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-green-100 hover:border-green-500 transition">
-                    <RadioGroupItem value="fulltime" id="fulltime" />
-                    <Label htmlFor="fulltime" className="flex-col items-start cursor-pointer">
-                      <div className="font-semibold flex items-start gap-2">
-                        Full Time Program
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Traditional classroom-based programs with a structured academic schedule.
-                      </p>
-                    </Label>
-                  </div>
+          <DialogContent className="max-w-sm bg-white">
+            <DialogHeader>
+              <DialogTitle>Select Program Type</DialogTitle>
+            </DialogHeader>
 
-                  <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-green-100 hover:border-green-500 transition">
-                    <RadioGroupItem value="flex" id="flex" />
-                    <Label htmlFor="flex" className="flex-col items-start cursor-pointer">
-                      <div className="font-semibold flex items-start gap-2">
-                        <p>Flex Program</p>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Designed for working professionals with flexible class timings.
-                      </p>
-                    </Label>
-                  </div>
-                </RadioGroup>
+            <RadioGroup
+              value={selectedType}
+              onValueChange={setSelectedType}
+              className="space-y-3 py-4"
+            >
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-green-100">
+                <RadioGroupItem value="fulltime" id="fulltime" />
+                <Label htmlFor="fulltime">
+                  <b>Full Time Program</b>
+                  <p className="text-sm text-muted-foreground">
+                    Traditional on-campus program
+                  </p>
+                </Label>
               </div>
 
-              <DialogFooter>
-                <Button
-                  onClick={() => {
-                    setOpen(false);
-                    if (selectedType === "fulltime") {
-                      navigate("/program/fulltime/create");
-                    } else {
-                      navigate("/program/fulltime/create");
-                    }
-                  }}
-                >
-                  Continue<ChevronsRight className="inline-block"/>
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-green-100">
+                <RadioGroupItem value="flex" id="flex" />
+                <Label htmlFor="flex">
+                  <b>Flex Program</b>
+                  <p className="text-sm text-muted-foreground">
+                    For working professionals
+                  </p>
+                </Label>
+              </div>
+            </RadioGroup>
+
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setOpen(false);
+                  navigate(
+                    selectedType === "fulltime"
+                      ? "/program/fulltime/create"
+                      : "/program/flex/create"
+                  );
+                }}
+              >
+                Continue <ChevronsRight className="ml-1 w-4 h-4" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+       {/* <FileUploader
+        uploadPresignUrl={`${import.meta.env.VITE_API_BASE_URL}/upload/presign`}
+        accept="image/*,application/pdf"
+        maxSizeMB={20}
+        multiple={true}
+        onUploaded={handleUploaded}
+      />
 
-      {/* Accordion List */}
-      <Accordion
-        type="single"
-        collapsible
-        className="space-y-3"
-        defaultValue="page-0"
-      >
-        {fullTimeProgramsData.map((page, pageIndex) => {
-          const Icon = iconMap[page.icon];
-          return (
-            <AccordionItem
-              key={pageIndex}
-              value={`page-${pageIndex}`}
-              className="border border-border shadow-sm rounded-lg bg-muted/30"
+      <div className="mt-4 space-y-2">
+        {uploadedFiles.map((file, i) => (
+          <div key={i} className="text-sm">
+            ✅ {file.name} →  
+            <a
+              href={file.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 underline ml-2"
             >
-              <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg">
-                <div className="flex items-center gap-2">
-                  {Icon && <Icon className="w-5 h-5 text-primary" />}
-                  <span>{page.pageTitle}</span>
-                </div>
-              </AccordionTrigger>
+              View File
+            </a>
+            <img src={file.url} alt={file.name} />
+          </div>
+        ))}
+          </div> */}
 
-              <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
-                {page.sections.map((section, i) => (
-                  <Accordion
-                    key={i}
-                    type="single"
-                    collapsible
-                    className="border-l pl-4 space-y-2"
+      {/* Loading */}
+      {loading && (
+        <div className="space-y-4 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex justify-between items-center p-3 border rounded-lg bg-muted"
+            >
+              <div className="h-4 w-2/3 bg-gray-300 rounded"></div>
+              <div className="h-5 w-5 bg-gray-300 rounded"></div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!loading && programs.length === 0 && (
+        <div className="flex flex-col items-center justify-center text-center p-10 border rounded-lg bg-muted/40">
+          <div className="bg-primary/10 p-4 rounded-full mb-4">
+            <GraduationCap className="w-8 h-8 text-primary" />
+          </div>
+
+          <h3 className="font-semibold text-lg">No Programs Available</h3>
+
+          <p className="text-sm text-muted-foreground max-w-sm mt-1">
+            You haven’t added any full-time programs yet. Start by creating your
+            first program.
+          </p>
+
+          <Button
+            className="mt-4"
+            onClick={() => navigate("/program/fulltime/create")}
+          >
+            + Add First Program
+          </Button>
+        </div>
+      )}
+
+      {/* Accordion */}
+      {!loading && programs.length > 0 && (
+        <Accordion type="single" collapsible className="space-y-3" defaultValue="programs">
+          <AccordionItem value="programs" className="border border-border shadow-sm rounded-lg bg-muted/30 p-2">
+            <AccordionTrigger className="flex justify-between items-center px-2 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-5 h-5" />
+                Full Time Programs
+              </div>
+            </AccordionTrigger>
+
+            <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
+              {programs.map((program) => {
+                const slug = slugify(program.programTitle);
+
+                return (
+                  <div
+                    key={program._id}
+                    className="flex justify-between items-center p-2 border bg-white hover:bg-gray-50 cursor-pointer rounded-md group"
                   >
-                    {section.submenu.map((sub, j) =>
-                      sub.submenu ? (
-                        <AccordionItem
-                          key={j}
-                          value={`sub-${j}`}
-                          className="border-l bg-background rounded-sm border-border pl-3 pr-3"
-                        >
-                          <AccordionTrigger className="text-sm font-medium text-left hover:text-primary flex justify-between items-center cursor-pointer">
-                            <span>{sub.label}</span>
-                          </AccordionTrigger>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-fit text-sm font-normal text-left cursor-pointer"
+                      onClick={() =>
+                        
+                        navigate(`/program/fulltime/${slug}/${program._id}`, {
+                          state: { programId: program._id },
+                        })
+                      }
+                    >
+                      {program.programTitle}
+                    </Button>
 
-                          <AccordionContent className="flex flex-col gap-2">
-                            {sub.submenu.map((nested, k) => (
-                              <div
-                                key={k}
-                                className="flex items-center justify-between group"
-                              >
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-fit text-sm font-normal text-left cursor-pointer"
-                                  onClick={() => navigate(nested.link)}
-                                >
-                                  {nested.label}
-                                </Button>
-                                <Pencil
-                                  className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
-                                  onClick={() => navigate(nested.link)}
-                                />
-                              </div>
-                            ))}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ) : (
-                        <div
-                          key={j}
-                          className="flex items-center justify-between group"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-fit text-sm font-normal text-left cursor-pointer"
-                            onClick={() => navigate(sub.link)}
-                          >
-                            {sub.label}
-                          </Button>
-                          <Pencil
-                            className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
-                            onClick={() => navigate(sub.link)}
-                          />
-                        </div>
-                      )
-                    )}
-                  </Accordion>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+                    <Pencil
+                      className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
+                      onClick={() =>
+                        navigate(`/program/fulltime/${slug}/${program._id}`)
+                      } 
+                    />
+                  </div>
+                );
+              })}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
     </div>
   );
 }
