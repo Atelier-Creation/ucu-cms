@@ -96,6 +96,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         },
       ],
     },
+    { to: "/online-program", label: "Online Programs", icon: Settings },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
 

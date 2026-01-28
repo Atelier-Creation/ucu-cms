@@ -21,6 +21,7 @@ import FlexiProgram from "./pages/FlexiProgram";
 import CrpfwProgram from "./pages/CrpfwProgram";
 import CouncilPage from "./pages/CouncilPage/CouncilPage";
 import CouncilSubmenuPage from "./pages/CouncilPage/CouncilSubmenuPage";
+import OnlineProgram from "./pages/OnlineProgram/OnlineProgram";
 function App() {
   return (
     <Router>
@@ -41,6 +42,7 @@ function App() {
           />
           <Route path="/programs/fulltime" element={<FullTimePrograms />} />
           <Route path="/programs/flexi-program" element={<FlexiProgram />} />
+          <Route path="/online-program" element={<OnlineProgram />} />
           <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
           <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
           <Route path="/advisory/*" element={<CouncilPage />} />
