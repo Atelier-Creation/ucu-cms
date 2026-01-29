@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 // import Posts from "./pages/Posts";
 // import Users from "./pages/Users";
@@ -114,6 +114,9 @@ function App() {
                       element={<ProgramEditor mode="edit" />}
                     />
                     {/* <Route path="/users" element={<Users />} /> */}
+
+                    {/* Catch-all for protected routes: Redirect to Dashboard */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                   <Toaster />
                 </AdminLayout>
