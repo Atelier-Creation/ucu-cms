@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
 body {
-  font-family: 'DM Sans', sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  /* font-family: 'DM Sans', sans-serif; -- Handled in index.css */
+  background-color: var(--background);
+  color: var(--foreground);
   transition: background-color 0.3s, color 0.3s;
 }
 
 /* Firefox */
 .sidebar-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #a0aec0 transparent;
+  scrollbar-color: var(--muted-foreground) transparent;
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
 }
@@ -21,22 +21,23 @@ body {
 }
 
 .sidebar-scroll::-webkit-scrollbar-track {
-  background: #d4d4d4d2;
+  background: transparent;
   margin: 8px 0;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background: #a0aec0;
+  background: var(--muted-foreground);
   border-radius: 4px;
   min-height: 20px;
 }
 
 /* STOP hover color change */
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;  /* SAME as normal */
+  background: var(--muted-foreground);
+  /* SAME as normal */
 }
 
 /* STOP click color change */
 .sidebar-scroll::-webkit-scrollbar-thumb:active {
-  background: #a0aec0;
+  background: var(--muted-foreground);
 }

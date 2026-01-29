@@ -132,11 +132,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                   <button
                     onClick={() => setOpenMenu(isOpen ? null : link.label)}
                     className={cn(
-                      "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all",
-                      isOpen ? "bg-blue-50 text-blue-800" : "hover:bg-gray-100",
-                      //Dark mode
-                      "dark:text-white dark:hover:bg-gray-800 dark:bg-transparent",
-                      isOpen && "dark:bg-blue-50 dark:text-blue-800"
+                      "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
+                      isOpen
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -151,7 +150,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                     />
                   </button>
                   {isOpen && (
-                    <div className="ml-7 border-l-2 border-blue-600 pl-4 space-y-1">
+                    <div className="ml-7 border-l-2 border-sidebar-border pl-4 space-y-1">
                       {link.submenu.map((sub) => {
                         const isSubActive = pathname.includes(sub.to);
                         return (
@@ -160,16 +159,17 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                             to={sub.to}
                             onClick={() => setMobileOpen(false)}
                             className={cn(
-                              "flex items-center py-2 text-sm text-gray-700 hover:text-blue-700 capitalize transition",
-                              "dark:text-gray-300 dark:hover:text-blue-800",
-                              isSubActive && "font-semibold text-blue-800"
+                              "flex items-center py-2 text-sm transition-colors duration-200",
+                              isSubActive
+                                ? "font-semibold text-primary"
+                                : "text-muted-foreground hover:text-primary"
                             )}
                           >
                             <div
                               className={cn(
-                                "w-3 h-3 absolute left-[39px] rounded-full border-2 bg-background border-blue-800 mr-2",
+                                "w-2 h-2 absolute left-[39px] rounded-full bg-border transition-all duration-200",
                                 isSubActive &&
-                                "border-white w-4 h-4 left-[37px] bg-blue-800"
+                                "w-2.5 h-2.5 bg-primary left-[38px] ring-2 ring-background"
                               )}
                             />
                             {sub.label}
@@ -188,9 +188,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 asChild
                 variant={isActive ? "default" : "ghost"}
                 className={cn(
-                  "w-full justify-start text-sm font-medium gap-3 py-2 hover:bg-gray-100",
-                  isActive &&
-                  "bg-blue-50 text-blue-800 hover:bg-gray-200 hover:text-gray-900"
+                  "w-full justify-start text-sm font-medium gap-3 py-2 mb-1 transition-all duration-200",
+                  isActive
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm font-semibold"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 )}
               >
                 <Link
@@ -219,7 +220,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           © {new Date().getFullYear()} UCU CMS
         </span>
       </div>
-    </div>
+    </div >
   );
 
   return (

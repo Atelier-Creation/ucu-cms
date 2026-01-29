@@ -127,15 +127,14 @@ export default function Navbar({ setMobileOpen }) {
                 y: isMobile ? "100%" : 0,
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={`fixed bg-background shadow-xl z-50 p-5 flex flex-col ${
-                isMobile
+              className={`fixed bg-background shadow-xl z-50 p-5 flex flex-col ${isMobile
                   ? "bottom-0 left-0 w-full h-[60vh] rounded-t-2xl"
                   : "top-0 right-0 w-80 md:w-96 h-full rounded-l-2xl"
-              }`}
+                }`}
             >
               {/* Mobile drag indicator */}
               {isMobile && (
-                <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3" />
+                <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-3" />
               )}
 
               {/* Header */}
