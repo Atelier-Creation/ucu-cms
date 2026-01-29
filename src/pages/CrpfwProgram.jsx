@@ -33,7 +33,7 @@ const fullTimeProgramsData = [
                 header: "Programs",
                 submenu: [
 
-                    { label: "Career Reboot Program for Women", link: "/programs/Career-Reboot-Program-for-Women/career-for-womens" },
+                    { label: "Career Reboot Program for Women", link: "/programs/Career-Reboot-Program-for-Women/career-for-womens/1" },
                 ],
             },
         ],

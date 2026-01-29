@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useAuth } from "../context/AuthContext";
 import {
   Home,
   PanelsTopLeft,
@@ -12,13 +13,10 @@ import {
   LogOut,
   GraduationCap,
   ChevronDown,
-  ChevronRight,
 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -26,7 +24,13 @@ import { useState } from "react";
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const { pathname } = useLocation();
   const [openMenu, setOpenMenu] = useState(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const links = [
     { to: "/", label: "Dashboard", icon: Home },
@@ -47,7 +51,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       icon: GraduationCap,
       submenu: [
         { to: "/programs/fulltime", label: "Full Time Programs" },
-        { to: "/programs/flexi-program", label: "Flexi Programs" },
+        { to: "/program/flexi", label: "Flexi Programs" },
         {
           to: "/programs/Career-Reboot-Program-for-Women",
           label: "Career Reboot Program for Women",
@@ -168,9 +172,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                           >
                             <div
                               className={cn(
-                                "w-2 h-2 absolute left-[39px] rounded-full bg-border transition-all duration-200",
+                                "w-2 h-2 absolute left-[41px] rounded-full bg-border transition-all duration-200",
                                 isSubActive &&
-                                "w-2.5 h-2.5 bg-primary left-[38px] ring-2 ring-background"
+                                "w-2.5 h-2.5 bg-primary left-[40px] ring-2 ring-background"
                               )}
                             />
                             {sub.label}
@@ -191,7 +195,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 className={cn(
                   "w-full justify-start text-sm font-medium gap-3 py-2 mb-1 transition-all duration-200",
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm font-semibold"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground hover:text-white shadow-sm font-semibold"
                     : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -213,7 +217,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
       {/* Footer */}
       <div className="p-4 flex flex-col items-center gap-4 w-full border-t bg-background">
-        <Button variant="ghost" className="justify-start gap-2 w-full">
+        <Button variant="ghost" className="justify-start gap-2 w-full" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           Logout
         </Button>

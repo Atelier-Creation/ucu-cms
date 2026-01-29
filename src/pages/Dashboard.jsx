@@ -1,4 +1,4 @@
-import { Calendar, Users, FileText, DollarSign, TrendingUp, TrendingDown, Activity, ArrowRight } from "lucide-react";
+import { Calendar, Users, FileText, IndianRupee, TrendingUp, TrendingDown, Activity, ArrowRight } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
@@ -29,7 +29,7 @@ export default function Dashboard() {
       id: 3,
       label: "Revenue",
       value: "₹12.3k",
-      icon: DollarSign,
+      icon: IndianRupee,
       trend: "-2.1%",
       trendUp: false,
       description: "total earnings this month"
