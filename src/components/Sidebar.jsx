@@ -42,6 +42,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         { to: "/pages/home", label: "Home" },
         { to: "/pages/industry", label: "Industry Partnership" },
         { to: "/pages/status", label: "Social Impact" },
+        { to: "/pages/admission", label: "Admissions" },
       ],
     },
     { to: "/students", label: "Students", icon: Users },

@@ -23,6 +23,7 @@ import CrpfwProgram from "./pages/CrpfwProgram";
 import CouncilPage from "./pages/CouncilPage/CouncilPage";
 import CouncilSubmenuPage from "./pages/CouncilPage/CouncilSubmenuPage";
 import OnlineProgram from "./pages/OnlineProgram/OnlineProgram";
+import AdmissionPageCMS from "./pages/AdmissionPageCMS";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -58,6 +59,7 @@ function App() {
                     <Route path="/events" element={<UpcomingEventsPage />} />
                     <Route path="/programs/fulltime" element={<FullTimePrograms />} />
                     <Route path="/program/flexi" element={<FlexiProgram />} />
+                    <Route path="/pages/admission" element={<AdmissionPageCMS />} />
                     <Route path="/online-program" element={<OnlineProgram />} />
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
