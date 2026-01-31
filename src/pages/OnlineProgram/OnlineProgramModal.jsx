@@ -3,18 +3,109 @@ import { Highlighter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-
+import { getAllBanners, createBanner, updateBanner, deleteBanner } from "@/Api/OnlineProgramApi/OnlineBannerApi";
 const OnlineProgramModal = ({
   isOpen,
   onClose,
   defaultHeader = "",
   defaultImage = null,
 }) => {
-  const { register, setValue } = useForm();
+  const { register, handleSubmit, reset, setValue } = useForm();
 
   const [previewHeader, setPreviewHeader] = useState("");
   const [previewImage, setPreviewImage] = useState(null);
-  const [undoStack, setUndoStack] = useState([]);
+  const [data, setData] = useState([])
+  const [editingdata, setEditingData] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetchdata()
+  }, [])
+
+  const fetchdata = async () => {
+    try {
+      const data = await getAllBanners()
+      console.log("Fetched Banners:", data);
+      setData(Array.isArray(data) ? data : data.data || [])
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+    }
+  }
+
+  const onSubmit = async (formData) => {
+    try {
+      setIsSaving(true);
+
+      const payload = {
+        bannerTitle: formData.header,
+        bannerContent: formData.description,
+        bannerImage: previewImage ? [previewImage] : [],
+      };
+
+      if (editingdata) {
+        await updateBanner(editingdata._id, payload);
+      } else {
+        await createBanner(payload);
+      }
+
+      // 🔄 fetch fresh data
+      const updatedData = await getAllBanners();
+      const banners = Array.isArray(updatedData)
+        ? updatedData
+        : updatedData.data || [];
+
+      setData(banners);
+
+      // 🧠 get latest updated item
+      const latestItem = editingdata
+        ? banners.find(b => b._id === editingdata._id)
+        : banners[banners.length - 1];
+
+      onClose();
+
+      setTimeout(() => {
+        setEditingData(latestItem);
+
+        reset({
+          header: latestItem?.bannerTitle || "",
+          description: latestItem?.bannerContent || "",
+        });
+
+        setPreviewHeader(latestItem?.bannerTitle || "");
+        setPreviewImage(latestItem?.bannerImage?.[0] || null);
+
+        setDialogOpen(true);
+      }, 300);
+
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+
+
+  const handleEdit = (item) => {
+    setEditingData(item);
+
+    reset({
+      header: item.bannerTitle,
+      description: item.bannerContent,
+    });
+
+    setPreviewHeader(item.bannerTitle);
+    setPreviewImage(item.bannerImage?.[0] || null);
+    setDialogOpen(true);
+  };
+
+
+  const handleDelete = async (id) => {
+    await deleteBanner(id);
+    await fetchdata();
+  };
+
+
 
   // ✅ Load default data when modal opens
   useEffect(() => {
@@ -27,16 +118,16 @@ const OnlineProgramModal = ({
 
   if (!isOpen) return null;
 
-  // ✅ Image preview handler
+  // ✅ Image Preview
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = () => setPreviewImage(reader.result);
     reader.readAsDataURL(file);
   };
 
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       {/* Modal Container */}
@@ -97,7 +188,7 @@ const OnlineProgramModal = ({
                 {...register("header")}
                 id="onlineHeaderInput"
                 placeholder="Enter header text..."
-                value={previewHeader}
+                value={previewHeader.replace(/<[^>]+>/g, "")}
                 onChange={(e) => {
                   setPreviewHeader(e.target.value);
                   setValue("header", e.target.value);
@@ -116,11 +207,10 @@ const OnlineProgramModal = ({
 
                   const start = input.selectionStart;
                   const end = input.selectionEnd;
-                  const value = input.value;
 
                   if (start === end) return;
 
-                  setUndoStack((prev) => [...prev, value]);
+                  const value = previewHeader;
 
                   const selectedText = value.slice(start, end);
                   const before = value.slice(0, start);
@@ -129,13 +219,13 @@ const OnlineProgramModal = ({
                   const highlightTag = `<span style="color:#5ac501;">${selectedText}</span>`;
                   const newValue = before + highlightTag + after;
 
-                  input.value = newValue;
                   setPreviewHeader(newValue);
                   setValue("header", newValue);
                 }}
               >
                 <Highlighter size={16} />
               </Button>
+
             </div>
 
             <p className="text-xs text-gray-500">
@@ -154,6 +244,15 @@ const OnlineProgramModal = ({
               />
             </div>
           </div>
+          {/* Description */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Description</label>
+            <textarea
+              {...register("description", { required: true })}
+              className="w-full border rounded-md p-2 h-24 resize-none"
+              placeholder="Write a short description..."
+            />
+          </div>
         </div>
 
         {/* Footer */}
@@ -165,10 +264,15 @@ const OnlineProgramModal = ({
             Cancel
           </button>
           <button
-            className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+            className={`px-5 py-2 text-sm font-medium text-white rounded-lg
+    ${isSaving ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}
+  `}
+            disabled={isSaving}
+            onClick={handleSubmit(onSubmit)}
           >
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </button>
+
         </div>
       </div>
     </div>
