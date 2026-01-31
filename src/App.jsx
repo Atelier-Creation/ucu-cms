@@ -27,6 +27,8 @@ import AdmissionPageCMS from "./pages/AdmissionPageCMS";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AboutSubmenuPage from "./pages/AboutPage/AboutSubmenuPage";
+import AboutPageEditor from "./pages/AboutPage/AboutPageEditor";
 
 function App() {
   return (
@@ -64,7 +66,13 @@ function App() {
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
                     <Route path="/advisory/*" element={<CouncilPage />} />
+                    <Route path="/advisory/*" element={<CouncilPage />} />
                     <Route path="/submenu/advisory/SME-Program-Advisory-Council" element={<CouncilSubmenuPage />} />
+
+                    {/* About Us Routes */}
+                    <Route path="/about-us" element={<AboutSubmenuPage />} />
+                    <Route path="/about-us/edit/:slug" element={<AboutPageEditor />} />
+
                     <Route path="/pages/industry" element={<IndustryPartnershipPage />} />
                     <Route
                       path="/programs/iss"

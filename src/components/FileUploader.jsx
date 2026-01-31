@@ -36,18 +36,33 @@ export default function FileUploader({
 
       try {
         // 1️⃣ Ask backend for presigned URL
-        const res = await fetch(`${uploadUrl}?filename=${encodeURIComponent(file.name)}`);
-        const { url, fileUrl } = await res.json();
+        // Use environment variable for base URL + upload/presign endpoint
+        const presignUrl = `${import.meta.env.VITE_API_BASE_URL}/upload/presign`;
+
+        const res = await fetch(presignUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status}`);
+        }
+
+        const { uploadUrl, publicUrl } = await res.json();
 
         // 2️⃣ Upload file directly to DigitalOcean Space
-        await fetch(url, {
+        await fetch(uploadUrl, {
           method: "PUT",
           headers: { "Content-Type": file.type },
           body: file,
         });
 
         // 3️⃣ Notify parent
-        onChange(fileUrl);
+        onChange(publicUrl);
       } catch (err) {
         console.error(err);
         setError("Upload failed. Try again.");

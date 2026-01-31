@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Accordion,
     AccordionItem,
@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Home, Mic, GraduationCap, Pencil, ChevronsRight, User2 } from "lucide-react";
+import { Home, Mic, GraduationCap, Pencil, ChevronsRight, User2, Plus, Trash, Check } from "lucide-react";
 import {
     Dialog,
     DialogTrigger,
@@ -16,198 +16,277 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getAdvisoryNavigation, createAdvisoryNavigation, updateAdvisoryNavigation, deleteAdvisoryNavigation } from "@/Api/AdvisoryNavigationApi";
+import { useToast } from "@/components/ui/use-toast";
 
 const iconMap = { Home, Mic, User2 };
 
-const fullTimeProgramsData = [
-    {
-        icon: "User2",
-        pageTitle: "SME Program Advisory Council",
-        sections: [
-            {
-                header: "Adiisory",
-                submenu: [
-                    { label: "Sales Advisory Council", link: "/advisory/Sales-Advisory-Council" },
-                    { label: "Product Management Advisory Council", link: "/advisory/Product-Management-Advisory-Council" },
-                    { label: "Cybersecurity Advisory Council", link: "/advisory/Cybersecurity-Advisory-Council" },
-                    { label: "FinTech Advisory Council ", link: "/advisory/FinTech-Advisory-Council " },
-                    { label: "GCC Advisory Council", link: "/advisory/GCC-Advisory-Council" },
-                    { label: "Mobility & Sustainability Advisory Council", link: "/advisory/Mobility-Sustainability-Advisory-Council" },
-                    { label: "Consulting Advisory Council", link: "/advisory/Consulting-Advisory-Council" },
-                ],
-            },
-        ],
-    },
-];
-
 function CouncilSubmenuPage() {
     const navigate = useNavigate();
-    const [open, setOpen] = React.useState(false);
-    const [selectedType, setSelectedType] = React.useState("fulltime");
+    const { toast } = useToast();
+    const [navData, setNavData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Dialog state for adding Groups
+    const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
+    const [newGroupTitle, setNewGroupTitle] = useState("");
+
+    // Dialog state for adding Items (Councils)
+    const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
+    const [targetGroupId, setTargetGroupId] = useState(null);
+    const [newItemTitle, setNewItemTitle] = useState("");
+
+    useEffect(() => {
+        fetchNavigation();
+    }, []);
+
+    const fetchNavigation = async () => {
+        setLoading(true);
+        try {
+            const result = await getAdvisoryNavigation();
+            if (result.success) {
+                // If empty, fallback to default or allow empty
+                setNavData(result.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch menu:", error);
+            toast({ title: "Error", description: "Failed to load menu", variant: "destructive" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreateGroup = async () => {
+        if (!newGroupTitle.trim()) return;
+        try {
+            const payload = {
+                title: newGroupTitle.trim(),
+                icon: "User2",
+                sections: [{
+                    header: "Advisory", // Default header
+                    items: []
+                }]
+            };
+            await createAdvisoryNavigation(payload);
+            toast({ title: "Success", description: "Group created" });
+            setIsGroupDialogOpen(false);
+            setNewGroupTitle("");
+            fetchNavigation();
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Error", description: "Failed to create group", variant: "destructive" });
+        }
+    };
+
+    const handleDeleteGroup = async (e, id) => {
+        e.stopPropagation();
+        if (!window.confirm("Delete this group and all its councils?")) return;
+        try {
+            await deleteAdvisoryNavigation(id);
+            toast({ title: "Success", description: "Group deleted" });
+            fetchNavigation();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to delete group", variant: "destructive" });
+        }
+    };
+
+    const handleAddItem = async () => {
+        if (!newItemTitle.trim() || !targetGroupId) return;
+
+        const group = navData.find(g => g._id === targetGroupId);
+        if (!group) return;
+
+        const slug = newItemTitle.trim().replace(/\s+/g, '-');
+        const newItem = {
+            label: newItemTitle.trim(),
+            link: `/advisory/${slug}`
+        };
+
+        // Deep copy struct
+        const updatedSections = [...group.sections];
+        if (updatedSections.length === 0) {
+            updatedSections.push({ header: "Advisory", items: [] });
+        }
+        updatedSections[0].items.push(newItem);
+
+        try {
+            await updateAdvisoryNavigation(targetGroupId, { ...group, sections: updatedSections });
+            toast({ title: "Success", description: "Council added" });
+            setIsItemDialogOpen(false);
+            setNewItemTitle("");
+            fetchNavigation();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to add council", variant: "destructive" });
+        }
+    };
+
+    const handleDeleteItem = async (e, groupId, itemIndex) => {
+        e.stopPropagation();
+        // Since sections[0] is default...
+        if (!window.confirm("Delete this council link?")) return;
+
+        const group = navData.find(g => g._id === groupId);
+        if (!group) return;
+
+        const updatedSections = [...group.sections];
+        if (updatedSections.length > 0) {
+            updatedSections[0].items.splice(itemIndex, 1);
+        }
+
+        try {
+            await updateAdvisoryNavigation(groupId, { ...group, sections: updatedSections });
+            toast({ title: "Success", description: "Council deleted" });
+            fetchNavigation();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to delete council", variant: "destructive" });
+        }
+    };
 
     return (
         <div className="space-y-4">
             {/* Header */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-foreground">
-                    SME Program Advisory Council        
-                </h1>
-                <div className="ml-2 text-right">
-                    <Dialog open={open} onOpenChange={setOpen} className='bg-white'>
-
-                        <DialogContent className="max-w-sm bg-white">
-                            <DialogHeader>
-                                <DialogTitle>Select Program Type</DialogTitle>
-                            </DialogHeader>
-
-                            <div className="py-4">
-                                <RadioGroup
-                                    value={selectedType}
-                                    onValueChange={setSelectedType}
-                                    className="space-y-3"
-                                >
-                                    <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-green-100 hover:border-green-500 transition">
-                                        <RadioGroupItem value="fulltime" id="fulltime" />
-                                        <Label htmlFor="fulltime" className="flex-col items-start cursor-pointer">
-                                            <div className="font-semibold flex items-start gap-2">
-                                                Full Time Program
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                Traditional classroom-based programs with a structured academic schedule.
-                                            </p>
-                                        </Label>
-                                    </div>
-
-                                    <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-green-100 hover:border-green-500 transition">
-                                        <RadioGroupItem value="flex" id="flex" />
-                                        <Label htmlFor="flex" className="flex-col items-start cursor-pointer">
-                                            <div className="font-semibold flex items-start gap-2">
-                                                <p>Flex Program</p>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                Designed for working professionals with flexible class timings.
-                                            </p>
-                                        </Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-
-                            <DialogFooter>
-                                <Button
-                                    onClick={() => {
-                                        setOpen(false);
-                                        if (selectedType === "fulltime") {
-                                            navigate("/program/fulltime/create");
-                                        } else {
-                                            navigate("/program/fulltime/create");
-                                        }
-                                    }}
-                                >
-                                    Continue<ChevronsRight className="inline-block" />
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+            <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+                <div>
+                    <h1 className="text-2xl font-semibold text-foreground">
+                        Advisory Councils
+                    </h1>
+                    <p className="text-muted-foreground text-sm">Manage Advisory Councils and Groups</p>
                 </div>
+                <Button onClick={() => setIsGroupDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" /> Add Advisory Group
+                </Button>
             </div>
+
+            {/* Helper if empty */}
+            {!loading && navData.length === 0 && (
+                <div className="text-center py-10 bg-muted/20 rounded-lg">
+                    <p className="text-muted-foreground">No Advisory Groups found. Create one to get started.</p>
+                </div>
+            )}
 
             {/* Accordion List */}
             <Accordion
                 type="single"
                 collapsible
                 className="space-y-3"
-                defaultValue="page-0"
             >
-                {fullTimeProgramsData.map((page, pageIndex) => {
-                    const Icon = iconMap[page.icon];
+                {navData.map((page, pageIndex) => {
+                    const Icon = iconMap[page.icon] || User2;
                     return (
                         <AccordionItem
-                            key={pageIndex}
-                            value={`page-${pageIndex}`}
+                            key={page._id}
+                            value={`page-${page._id}`}
                             className="border border-border shadow-sm rounded-lg bg-muted/30"
                         >
-                            <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg">
+                            <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg group">
                                 <div className="flex items-center gap-2">
-                                    {Icon && <Icon className="w-5 h-5 text-primary" />}
-                                    <span>{page.pageTitle}</span>
+                                    <Icon className="w-5 h-5 text-primary" />
+                                    <span>{page.title}</span>
                                 </div>
+                                {/* Stop propagation to prevent accordion toggle when clicking delete */}
+                                <Button
+                                    size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 text-red-500"
+                                    onClick={(e) => handleDeleteGroup(e, page._id)}
+                                >
+                                    <Trash className="w-4 h-4" />
+                                </Button>
                             </AccordionTrigger>
 
                             <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
-                                {page.sections.map((section, i) => (
-                                    <Accordion
-                                        key={i}
-                                        type="single"
-                                        collapsible
-                                        className="border-l pl-4 space-y-2"
-                                    >
-                                        {section.submenu.map((sub, j) =>
-                                            sub.submenu ? (
-                                                <AccordionItem
-                                                    key={j}
-                                                    value={`sub-${j}`}
-                                                    className="border-l bg-background rounded-sm border-border pl-3 pr-3"
-                                                >
-                                                    <AccordionTrigger className="text-sm font-medium text-left hover:text-primary flex justify-between items-center cursor-pointer">
-                                                        <span>{sub.label}</span>
-                                                    </AccordionTrigger>
+                                <div className="flex justify-end mb-2">
+                                    <Button size="sm" variant="outline" onClick={() => {
+                                        setTargetGroupId(page._id);
+                                        setIsItemDialogOpen(true);
+                                    }}>
+                                        <Plus className="w-3 h-3 mr-1" /> Add Council
+                                    </Button>
+                                </div>
 
-                                                    <AccordionContent className="flex flex-col gap-2">
-                                                        {sub.submenu.map((nested, k) => (
-                                                            <div
-                                                                key={k}
-                                                                className="flex items-center justify-between group"
-                                                            >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="w-fit text-sm font-normal text-left cursor-pointer"
-                                                                    onClick={() => navigate(nested.link)}
-                                                                >
-                                                                    {nested.label}
-                                                                </Button>
-                                                                <Pencil
-                                                                    className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
-                                                                    onClick={() => navigate(nested.link)}
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            ) : (
-                                                <div
-                                                    key={j}
-                                                    className="flex items-center justify-between group"
+                                {page.sections.map((section, i) => (
+                                    <div key={i} className="pl-4 border-l space-y-2">
+                                        {/* <h4 className="text-xs font-semibold text-muted-foreground uppercase">{section.header}</h4> */}
+                                        {section.items.map((sub, j) => (
+                                            <div
+                                                key={j}
+                                                className="flex items-center justify-between group bg-white p-2 rounded border"
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="w-fit text-sm font-normal text-left cursor-pointer"
+                                                    onClick={() => navigate(sub.link)}
                                                 >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="w-fit text-sm font-normal text-left cursor-pointer"
-                                                        onClick={() => navigate(sub.link)}
-                                                    >
-                                                        {sub.label}
+                                                    {sub.label}
+                                                </Button>
+                                                <div className="flex gap-1 opacity-60 group-hover:opacity-100">
+                                                    <Button variant="ghost" size="sm" onClick={() => navigate(sub.link)}>
+                                                        <Pencil className="w-4 h-4 text-blue-500" />
                                                     </Button>
-                                                    <Pencil
-                                                        className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
-                                                        onClick={() => navigate(sub.link)}
-                                                    />
+                                                    <Button variant="ghost" size="sm" onClick={(e) => handleDeleteItem(e, page._id, j)}>
+                                                        <Trash className="w-4 h-4 text-red-500" />
+                                                    </Button>
                                                 </div>
-                                            )
+                                            </div>
+                                        ))}
+                                        {section.items.length === 0 && (
+                                            <p className="text-xs text-muted-foreground italic">No councils here yet.</p>
                                         )}
-                                    </Accordion>
+                                    </div>
                                 ))}
                             </AccordionContent>
                         </AccordionItem>
                     );
                 })}
             </Accordion>
+
+            {/* Create Group Dialog */}
+            <Dialog open={isGroupDialogOpen} onOpenChange={setIsGroupDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add New Advisory Group</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Group Title</Label>
+                            <Input
+                                placeholder="e.g. Technology Advisory Council"
+                                value={newGroupTitle}
+                                onChange={(e) => setNewGroupTitle(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleCreateGroup}>Create Group</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create Item Dialog */}
+            <Dialog open={isItemDialogOpen} onOpenChange={setIsItemDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add New Council Page</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Council Name</Label>
+                            <Input
+                                placeholder="e.g. AI Ethics Council"
+                                value={newItemTitle}
+                                onChange={(e) => setNewItemTitle(e.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">This will generate a page at /advisory/AI-Ethics-Council</p>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleAddItem}>Add Council</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
 
-export default CouncilSubmenuPage
+export default CouncilSubmenuPage;
