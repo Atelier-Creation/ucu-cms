@@ -36,7 +36,7 @@ const fullTimeProgramsData = [
 
                     { label: "Online Program Hero", editType: "modal" },
                     { label: "Online Program Stats", link: "/online-program/stats" },
-                    { label: "How to apply", link: "/program/flexi/pgxpm" },
+                    { label: "How to apply", link: "/online-program/apply" },
                     { label: "Online Program Services", link: "/program/flexi/pgxpm" },
                     { label: "Our Collaborators", link: "/program/flexi/pgxpm" },
                 ],

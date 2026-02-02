@@ -30,6 +30,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AboutSubmenuPage from "./pages/AboutPage/AboutSubmenuPage";
 import AboutPageEditor from "./pages/AboutPage/AboutPageEditor";
 import OnlineProgramStats from "./pages/OnlineProgram/OnlineProgramStats";
+import OnlineProgramApply from "./pages/OnlineProgram/OnlineProgramApply";
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
                     <Route path="/pages/admission" element={<AdmissionPageCMS />} />
                     <Route path="/online-program" element={<OnlineProgram />} />
                     <Route path="/online-program/stats" element={<OnlineProgramStats />} />
+                    <Route path="/online-program/apply" element={<OnlineProgramApply />} />
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
                     <Route path="/advisory/*" element={<CouncilPage />} />
