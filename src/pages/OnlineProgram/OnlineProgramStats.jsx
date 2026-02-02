@@ -250,7 +250,7 @@ const handleDelete = async (id) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="/pages/home">Home Page</BreadcrumbLink>
+                        <BreadcrumbLink href="/online-program">Online Page</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>

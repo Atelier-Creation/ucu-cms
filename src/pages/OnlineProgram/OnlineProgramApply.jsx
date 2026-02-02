@@ -1,16 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CalendarDays, Pencil, Trash2 } from "lucide-react";
+import { CalendarDays, PanelsTopLeft, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import IconSearchPicker from "./IconSearchPicker";
 import { Label } from "@/components/ui/label";
 import { icons as Icons, ImageIcon } from "lucide-react";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
+    BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 import {
     Dialog,
     DialogContent,
@@ -18,6 +26,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
+import { createWorkflow, getAllWorkflows, updateStepById, deleteStepById } from "@/Api/OnlineProgramApi/OnlineProgramApply";
 const createEmptyStep = () => ({
     media: { type: "icon", value: "" },
     title: "",
@@ -26,6 +35,24 @@ const createEmptyStep = () => ({
     descList: [""],
 });
 
+const mapStepsToBackendPayload = (steps) => {
+    return {
+        steps: steps.map((step, index) => ({
+            stepNumber: index + 1,
+            title: step.title,
+            iconName: step.media?.type === "icon" ? step.media.value : "",
+            descriptionPoints:
+                step.descType === "list"
+                    ? step.descList.filter(Boolean)
+                    : step.descText
+                        ? [step.descText]
+                        : [],
+        })),
+    };
+};
+
+
+
 const OnlineProgramApply = () => {
     const { toast } = useToast();
 
@@ -33,17 +60,126 @@ const OnlineProgramApply = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [editIndex, setEditIndex] = useState(null);
     const [editData, setEditData] = useState(null);
+    const [stepsList, setStepsList] = useState([]);
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await getAllWorkflows();
+
+                const normalizedSteps = (res.data || []).flatMap(workflow =>
+                    workflow.steps.map(step => ({
+                        _id: step._id,
+                        // 🔹 MEDIA
+                        media: step.iconName
+                            ? { type: "icon", value: step.iconName }
+                            : { type: "icon", value: "" },
+
+                        // 🔹 TITLE
+                        title: step.title || "",
+
+                        // 🔹 DESCRIPTION
+                        descType: step.descriptionPoints?.length ? "list" : "text",
+                        descText: "",
+                        descList: step.descriptionPoints?.length
+                            ? step.descriptionPoints
+                            : [""],
+
+                        // 🔹 OPTIONAL META
+                        stepNumber: step.stepNumber,
+                        workflowId: workflow._id,
+                    }))
+                );
+
+                setStepsList(normalizedSteps);
+
+            } catch (error) {
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch data",
+                });
+            }
+        };
+
+        fetchData();
+    }, []);
+    const handleCreateWorkflow = async () => {
+        try {
+            const payload = mapStepsToBackendPayload(steps);
+
+            if (!payload.steps.length) {
+                toast({
+                    title: "Error",
+                    description: "At least one step is required",
+                });
+                return;
+            }
+
+            await createWorkflow(payload);
+
+            toast({
+                title: "Success",
+                description: "Workflow created successfully",
+            });
+
+            setSteps([createEmptyStep()]);
+            setCurrentStep(0);
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000); // 1 second delay
+
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: "Failed to create workflow",
+            });
+        }
+    };
+
+
+
     const updateMedia = (stepIndex, media) => {
         const updated = steps.map((s, i) => (i === stepIndex ? { ...s, media } : s));
         setSteps(updated);
     };
-    const saveEdit = () => {
-        const updated = [...steps];
-        updated[editIndex] = editData;
-        setSteps(updated);
-        setEditIndex(null);
-        toast({ title: "Updated", description: "Step updated successfully" });
+    const saveEdit = async () => {
+        if (editIndex === null || !editData) return;
+
+        try {
+            const stepToUpdate = stepsList[editIndex];
+
+            const payload = {
+                title: editData.title,
+                iconName: editData.media.type === "icon" ? editData.media.value : "",
+                descriptionPoints:
+                    editData.descType === "list"
+                        ? editData.descList.filter(Boolean)
+                        : editData.descText
+                            ? [editData.descText]
+                            : [],
+            };
+
+            // Update backend
+            await updateStepById(stepToUpdate._id, payload);
+
+            // Update local list
+            const updatedList = [...stepsList];
+            updatedList[editIndex] = {
+                ...updatedList[editIndex],
+                ...editData,
+            };
+            setStepsList(updatedList);
+
+            setEditIndex(null);
+            toast({ title: "Updated", description: "Step updated successfully" });
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Error", description: "Failed to update step" });
+        }
     };
+
     const handleFileUpload = (e, stepIndex) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -78,10 +214,6 @@ const OnlineProgramApply = () => {
         setSteps(updated);
     };
 
-    const handleSave = () => {
-        toast({ title: "Saved", description: `Step ${currentStep + 1} saved.` });
-    };
-
     const handleNextStep = () => {
         const stepData = steps[currentStep];
 
@@ -111,9 +243,17 @@ const OnlineProgramApply = () => {
         setCurrentStep(nextStepIndex);
     };
     const openEditModal = (index) => {
+        const stepToEdit = stepsList[index]; // <-- take from saved stepsList
         setEditIndex(index);
-        setEditData(JSON.parse(JSON.stringify(steps[index])));
+        setEditData({
+            ...stepToEdit,
+            media: stepToEdit.media || { type: "icon", value: "" },
+            descType: stepToEdit.descType || "text",
+            descText: stepToEdit.descText || "",
+            descList: stepToEdit.descList || [""],
+        });
     };
+
     const handleBackStep = () => {
         if (currentStep === 0) return;
         setCurrentStep(currentStep - 1);
@@ -121,9 +261,10 @@ const OnlineProgramApply = () => {
 
     const current = steps[currentStep];
     const renderStepMedia = (media) => {
-        if (!media) return <ImageIcon className="w-6 h-6" />;
+        if (!media || !media.type) {
+            return <ImageIcon className="w-6 h-6" />;
+        }
 
-        // ICON
         if (media.type === "icon" && media.value) {
             const IconComponent = Icons[media.value];
             return IconComponent ? (
@@ -133,8 +274,10 @@ const OnlineProgramApply = () => {
             );
         }
 
-        // IMAGE (URL or FILE)
-        if ((media.type === "url" || media.type === "file") && media.value) {
+        if (
+            (media.type === "url" || media.type === "file") &&
+            media.value
+        ) {
             return (
                 <img
                     src={media.value}
@@ -146,9 +289,38 @@ const OnlineProgramApply = () => {
 
         return <ImageIcon className="w-6 h-6" />;
     };
+    const deleteStep = async (index) => {
+        try {
+            const stepToDelete = stepsList[index];
+            await deleteStepById(stepToDelete._id);
+            const updatedList = stepsList.filter((_, i) => i !== index);
+            setStepsList(updatedList);
+            toast({ title: "Deleted", description: "Step deleted successfully" });
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to delete step" });
+        }
+    };
 
     return (
         <div className="p-6 space-y-6">
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                        <BreadcrumbLink href="/pages/home">
+                            <PanelsTopLeft className="w-4 h-4 inline-block mr-1" />
+                            Pages
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbLink href="/online-program">Online Page</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>How To Apply</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold flex items-center gap-2">
                     <CalendarDays className="w-6 h-6 text-primary" />
@@ -174,7 +346,7 @@ const OnlineProgramApply = () => {
                                 <label key={type} className="flex items-center gap-1">
                                     <input
                                         type="radio"
-                                        checked={current.media.type === type}
+                                        checked={current?.media?.type === type}
                                         onChange={() => updateMedia(currentStep, { type, value: "" })}
                                     />
                                     {type}
@@ -296,7 +468,7 @@ const OnlineProgramApply = () => {
                             Back
                         </Button>
                         <div className="flex gap-2">
-                            <Button onClick={handleSave} className="bg-blue-500 text-white">
+                            <Button onClick={handleCreateWorkflow} className="bg-blue-500 text-white">
                                 Save
                             </Button>
                             <Button onClick={handleNextStep} className="bg-green-500 text-white">
@@ -310,39 +482,33 @@ const OnlineProgramApply = () => {
             <div className="mt-8">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-gray-800">Sequence of Steps</h2>
-                    <span className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full border border-blue-100">
-                        {steps.length} Total Steps
-                    </span>
                 </div>
 
                 {/* ---------------- STEPS LIST ---------------- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {steps.map((step, index) => (
+                    {stepsList.map((step, index) => (
                         <Card key={index} className="rounded-xl border hover:shadow-md">
-                            <CardContent className="flex justify-between items-start pt-6">
-                                <div className="flex gap-4 justify-between items-start">
-                                    <div className="flex flex-col gap-4">
-                                        <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
-                                            {renderStepMedia(step.media)}
-                                        </div>
+                            <CardContent className="flex justify-between items-start">
+                                <div className="flex flex-col gap-4">
+                                    <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                                        {renderStepMedia(step.media)}
+                                    </div>
 
-                                        <div>
-                                            <h3 className="font-semibold text-lg">
-                                                {step.title || `Untitled Step ${index + 1}`}
-                                            </h3>
-                                            <p className="text-sm text-gray-600">
-                                                {step.descType === "text"
-                                                    ? step.descText || "No description"
-                                                    : step.descList
-                                                        .filter(Boolean)
-                                                        .join(", ") || "No list items"}
-                                            </p>
-                                        </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">
+                                            {step.title || `Untitled Step ${index + 1}`}
+                                        </h3>
+
+                                        <p className="text-sm text-gray-600">
+                                            {step.descType === "text"
+                                                ? step.descText || "No description"
+                                                : step.descList?.filter(Boolean).join(", ") || "No list items"}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
+
+                                <div className="flex">
                                     <Button
-                                        variant="ghost"
                                         size="icon"
                                         onClick={() => openEditModal(index)}
                                     >
@@ -352,8 +518,8 @@ const OnlineProgramApply = () => {
                                     <Button
                                         variant="ghost"
                                         size="icon"
+                                        className="text-red-500 hover:bg-white"
                                         onClick={() => deleteStep(index)}
-                                        className="text-red-500"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -362,6 +528,7 @@ const OnlineProgramApply = () => {
                         </Card>
                     ))}
                 </div>
+
 
                 {/* ---------------- EDIT MODAL ---------------- */}
                 <Dialog open={editIndex !== null} onOpenChange={() => setEditIndex(null)}>
@@ -372,17 +539,15 @@ const OnlineProgramApply = () => {
 
                         {editData && (
                             <div className="space-y-5">
-
                                 {/* -------- MEDIA PICKER -------- */}
                                 <div className="space-y-2">
                                     <Label>Add Icon / Image</Label>
-
                                     <div className="flex gap-4 text-sm">
                                         {["icon", "url", "file"].map((type) => (
                                             <label key={type} className="flex items-center gap-1">
                                                 <input
                                                     type="radio"
-                                                    checked={editData.media.type === type}
+                                                    checked={editData.media?.type === type}
                                                     onChange={() =>
                                                         setEditData({
                                                             ...editData,
@@ -398,6 +563,7 @@ const OnlineProgramApply = () => {
                                     {editData.media.type === "icon" && (
                                         <IconSearchPicker
                                             value={editData.media.value}
+                                            columns={3}
                                             onSelect={(val) =>
                                                 setEditData({
                                                     ...editData,
@@ -463,6 +629,7 @@ const OnlineProgramApply = () => {
                                                         ...editData,
                                                         descType: "text",
                                                         descText: editData.descText || "",
+                                                        descList: [""],
                                                     })
                                                 }
                                             >
@@ -478,6 +645,7 @@ const OnlineProgramApply = () => {
                                                         descList: editData.descList.length
                                                             ? editData.descList
                                                             : [""],
+                                                        descText: "",
                                                     })
                                                 }
                                             >
@@ -491,10 +659,7 @@ const OnlineProgramApply = () => {
                                         <Textarea
                                             value={editData.descText}
                                             onChange={(e) =>
-                                                setEditData({
-                                                    ...editData,
-                                                    descText: e.target.value,
-                                                })
+                                                setEditData({ ...editData, descText: e.target.value })
                                             }
                                         />
                                     )}
@@ -510,10 +675,7 @@ const OnlineProgramApply = () => {
                                                         onChange={(e) => {
                                                             const updated = [...editData.descList];
                                                             updated[i] = e.target.value;
-                                                            setEditData({
-                                                                ...editData,
-                                                                descList: updated,
-                                                            });
+                                                            setEditData({ ...editData, descList: updated });
                                                         }}
                                                     />
                                                     {editData.descList.length > 1 && (
@@ -524,10 +686,7 @@ const OnlineProgramApply = () => {
                                                                 const updated = editData.descList.filter(
                                                                     (_, idx) => idx !== i
                                                                 );
-                                                                setEditData({
-                                                                    ...editData,
-                                                                    descList: updated,
-                                                                });
+                                                                setEditData({ ...editData, descList: updated });
                                                             }}
                                                         >
                                                             <Trash2 className="w-4 h-4" />
@@ -553,7 +712,6 @@ const OnlineProgramApply = () => {
                             </div>
                         )}
 
-
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setEditIndex(null)}>
                                 Cancel
@@ -562,6 +720,7 @@ const OnlineProgramApply = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
             </div>
 
 
