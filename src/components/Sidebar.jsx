@@ -13,6 +13,8 @@ import {
   LogOut,
   GraduationCap,
   ChevronDown,
+  Globe,
+  School,
 } from "lucide-react";
 import {
   Sheet,
@@ -45,7 +47,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         { to: "/pages/admission", label: "Admissions" },
       ],
     },
-    { to: "/about-us", label: "About Us", icon: Users },
+    { to: "/about-us", label: "About Us", icon: Globe },
     { to: "/students", label: "Students", icon: Users },
     {
       to: "/Programs",
@@ -65,44 +67,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     { to: "/events", label: "Events", icon: CalendarDays },
-    {
-      to: "/advisory-councils",
-      label: "Advisory Councils",
-      icon: GraduationCap,
-      submenu: [
-        { to: "/advisory/Business-Advisory-Council", label: "Business Advisory Council" },
-        { to: "/advisory/Academic-Advisory-Council", label: "Academic Advisory Council" },
-        {
-          to: "/advisory/CHRO-Advisory-Council",
-          label: "CHRO Advisory Council",
-        },
-        {
-          to: "/advisory/Talent-Advisory-Council",
-          label: "Talent Advisory Council",
-        },
-        {
-          to: "/advisory/L&D-Advisory-Council",
-          label: "L&D Advisory Council",
-        },
-        {
-          to: "/advisory/Young-CXO-Council",
-          label: "Young CXO Council ",
-        },
-        {
-          to: "/advisory/Rising-Leaders-Council ",
-          label: "Rising Leaders' Council ",
-        },
-        {
-          to: "/advisory/Our-Brand-Ambassadors",
-          label: "Our Brand Ambassadors",
-        },
-        {
-          to: "/submenu/advisory/SME-Program-Advisory-Council",
-          label: "SME Program Advisory Council",
-        },
-      ],
-    },
-    { to: "/online-program", label: "Online Programs", icon: Settings },
+    { to: "/advisory-councils", label: "Advisory Councils", icon: GraduationCap },
+    { to: "/online-program", label: "Online Programs", icon: School },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
 

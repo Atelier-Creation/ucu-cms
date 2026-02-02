@@ -29,6 +29,9 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AboutSubmenuPage from "./pages/AboutPage/AboutSubmenuPage";
 import AboutPageEditor from "./pages/AboutPage/AboutPageEditor";
+import LeadershipEditor from "./pages/AboutPage/LeadershipEditor";
+import IndustryApproachEditor from "./pages/AboutPage/IndustryApproachEditor";
+import FounderMessageEditor from "./pages/AboutPage/FounderMessageEditor";
 
 function App() {
   return (
@@ -67,11 +70,14 @@ function App() {
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
                     <Route path="/advisory/*" element={<CouncilPage />} />
                     <Route path="/advisory/*" element={<CouncilPage />} />
-                    <Route path="/submenu/advisory/SME-Program-Advisory-Council" element={<CouncilSubmenuPage />} />
+                    <Route path="/advisory-councils" element={<CouncilSubmenuPage />} />
 
                     {/* About Us Routes */}
                     <Route path="/about-us" element={<AboutSubmenuPage />} />
                     <Route path="/about-us/edit/:slug" element={<AboutPageEditor />} />
+                    <Route path="/about-us/leadership/:slug" element={<LeadershipEditor />} />
+                    <Route path="/about-us/industry-approach/:slug" element={<IndustryApproachEditor />} />
+                    <Route path="/about-us/founder-message/:slug" element={<FounderMessageEditor />} />
 
                     <Route path="/pages/industry" element={<IndustryPartnershipPage />} />
                     <Route

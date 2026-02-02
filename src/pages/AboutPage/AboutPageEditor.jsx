@@ -124,7 +124,9 @@ export default function AboutPageEditor() {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold">Edit Page: {data.title}</h1>
+                    <h1 className="text-2xl font-bold flex items-center gap-1">
+                        Edit Page: <span dangerouslySetInnerHTML={{ __html: data.title || '' }} />
+                    </h1>
                     <p className="text-sm text-muted-foreground">/about/{data.pageSlug}</p>
                 </div>
                 <div className="ml-auto">
@@ -271,6 +273,7 @@ export default function AboutPageEditor() {
                                                 <FileUploader
                                                     value={img}
                                                     onChange={(url) => updateGalleryImage(idx, imgIdx, url)}
+                                                    accept={section.type === 'brand_logos' ? "image/png" : "image/*"}
                                                 />
                                                 <Button
                                                     variant="destructive"
