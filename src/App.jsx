@@ -29,6 +29,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AboutSubmenuPage from "./pages/AboutPage/AboutSubmenuPage";
 import AboutPageEditor from "./pages/AboutPage/AboutPageEditor";
+import OnlineProgramStats from "./pages/OnlineProgram/OnlineProgramStats";
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
                     <Route path="/program/flexi" element={<FlexiProgram />} />
                     <Route path="/pages/admission" element={<AdmissionPageCMS />} />
                     <Route path="/online-program" element={<OnlineProgram />} />
+                    <Route path="/online-program/stats" element={<OnlineProgramStats />} />
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
                     <Route path="/advisory/*" element={<CouncilPage />} />
