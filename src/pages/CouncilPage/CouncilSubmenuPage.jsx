@@ -48,6 +48,7 @@ function CouncilSubmenuPage() {
         setLoading(true);
         try {
             const result = await getAdvisoryNavigation();
+            console.log(result)
             if (result.success) {
                 setNavData(result.data);
             }
@@ -244,7 +245,6 @@ function CouncilSubmenuPage() {
                             </Accordion>
                         );
                     }
-
                     // IF SINGLE ITEM
                     else {
                         return (
@@ -305,6 +305,7 @@ function CouncilSubmenuPage() {
                             />
                         </div>
                     </div>
+
                     <DialogFooter>
                         <Button onClick={handleCreateTopLevel}>Create</Button>
                     </DialogFooter>
