@@ -72,8 +72,7 @@ function App() {
                     <Route path="/online-program/apply" element={<OnlineProgramApply />} />
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
-                    <Route path="/advisory/*" element={<CouncilPage />} />
-                    <Route path="/advisory/*" element={<CouncilPage />} />
+                    <Route path="/advisory-councils/*" element={<CouncilPage />} />
                     <Route path="/advisory-councils" element={<CouncilSubmenuPage />} />
 
                     {/* About Us Routes */}

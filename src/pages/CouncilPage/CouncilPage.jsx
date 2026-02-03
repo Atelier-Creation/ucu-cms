@@ -67,9 +67,12 @@ function CouncilPage() {
   const pathnames = location.pathname
     .split("/")
     .filter(Boolean)
-    .filter((segment) => segment.toLowerCase() !== "advisory");
+    .filter((segment) => !["advisory", "advisory-councils"].includes(segment.toLowerCase()));
 
   const formattedPath = (segment) => {
+    // If it looks like a short code (slug), keep it as is or uppercase it? 
+    // Actually, passing it raw to backend is best for slug match. 
+    // But existing logic tries to format it. Let's rely on backend regex.
     return segment
       .replace(/-/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -77,9 +80,11 @@ function CouncilPage() {
 
   useEffect(() => {
     if (pathnames.length > 0) {
-      const title = formattedPath(pathnames[pathnames.length - 1]);
-      setCouncilTitle(title);
-      fetchData(title);
+      // Use the last segment as identifier (slug or title)
+      // We pass it to formattedPath for initial display state but backend search is robust
+      const identifier = pathnames[pathnames.length - 1];
+      setCouncilTitle(formattedPath(identifier));
+      fetchData(identifier); // Pass raw identifier (slug) to fetch
     }
   }, [location.pathname]);
 
@@ -90,6 +95,10 @@ function CouncilPage() {
       if (result && result.data) {
         setCategory(result.data.category);
         setAdvisors(result.data.adivsories || []);
+        // Update display title to match DB
+        if (result.data.category.councilTitle) {
+          setCouncilTitle(result.data.category.councilTitle);
+        }
       } else {
         // Category doesn't exist, prepare to create it
         setCategory({
@@ -215,6 +224,14 @@ function CouncilPage() {
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/advisory-councils">Advisory Councils</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
           {pathnames.map((segment, index) => {
             const routeTo = "/advisory/" + pathnames.slice(0, index + 1).join("/"); // simplified route construction
             const isLast = index === pathnames.length - 1;
