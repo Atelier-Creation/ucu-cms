@@ -27,6 +27,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { createWorkflow, getAllWorkflows, updateStepById, deleteStepById } from "@/Api/OnlineProgramApi/OnlineProgramApply";
+import { useNavigate } from "react-router-dom";
 const createEmptyStep = () => ({
     media: { type: "icon", value: "" },
     title: "",
@@ -55,7 +56,7 @@ const mapStepsToBackendPayload = (steps) => {
 
 const OnlineProgramApply = () => {
     const { toast } = useToast();
-
+    const navigate = useNavigate()
     const [steps, setSteps] = useState([createEmptyStep()]);
     const [currentStep, setCurrentStep] = useState(0);
     const [editIndex, setEditIndex] = useState(null);
@@ -510,7 +511,7 @@ const OnlineProgramApply = () => {
                                 <div className="flex">
                                     <Button
                                         size="icon"
-                                        onClick={() => openEditModal(index)}
+                                        onClick={() => navigate(`/online-program/edit/${step._id}`)}
                                     >
                                         <Pencil className="w-4 h-4" />
                                     </Button>
