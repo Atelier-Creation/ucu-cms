@@ -34,6 +34,7 @@ import IndustryApproachEditor from "./pages/AboutPage/IndustryApproachEditor";
 import FounderMessageEditor from "./pages/AboutPage/FounderMessageEditor";
 import OnlineProgramStats from "./pages/OnlineProgram/OnlineProgramStats";
 import OnlineProgramApply from "./pages/OnlineProgram/OnlineProgramApply";
+import OnlineProgramBannerPage from "./pages/OnlineProgram/OnlineProgramBannerPage";
 
 function App() {
   return (
@@ -70,6 +71,7 @@ function App() {
                     <Route path="/online-program" element={<OnlineProgram />} />
                     <Route path="/online-program/stats" element={<OnlineProgramStats />} />
                     <Route path="/online-program/apply" element={<OnlineProgramApply />} />
+                    <Route path="/online-program/banner" element={<OnlineProgramBannerPage />} />
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
                     <Route path="/advisory/*" element={<CouncilPage />} />
