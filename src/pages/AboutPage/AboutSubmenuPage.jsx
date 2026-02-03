@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash, FileText, Users, Building2, MessageSquare } from "lucide-react";
+import { Plus, Pencil, Trash, FileText, Users, Building2, MessageSquare, ArrowLeft } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -140,17 +140,24 @@ function AboutSubmenuPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">About Us / Specialized Pages</h1>
-                    <p className="text-muted-foreground text-sm">Manage all pages including Leadership, Founder Message, etc.</p>
+            <div className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm border">
+                <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div className="flex-1">
+                    <h1 className="text-2xl font-bold text-foreground">About Us / Specialized Pages</h1>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <span className="hover:underline cursor-pointer" onClick={() => navigate("/dashboard")}>Dashboard</span>
+                        <span>/</span>
+                        <span className="font-medium text-foreground">About Us</span>
+                    </div>
                 </div>
                 <Button onClick={() => { setPageTitle(""); setPageType("generic"); setIsCreateDialogOpen(true); }}>
                     <Plus className="w-4 h-4 mr-2" /> Create New Page
                 </Button>
             </div>
 
-            <div className="border rounded-md bg-white">
+            <div className="border rounded-md bg-card">
                 <Table>
                     <TableHeader>
                         <TableRow>

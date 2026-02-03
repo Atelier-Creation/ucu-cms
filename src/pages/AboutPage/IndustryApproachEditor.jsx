@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, Trash, Save } from "lucide-react";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
+import { Loader2, Plus, Trash, Save, ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
 import FileUploader from "../../components/FileUploader";
@@ -20,9 +21,18 @@ const ICON_OPTIONS = [
 
 function IndustryApproachEditor() {
     const { slug } = useParams();
+    const navigate = useNavigate();
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const featuresRef = useRef(null);
+    const [shouldScroll, setShouldScroll] = useState(false);
+
+    // Dirty tracking
+    const [isDirty, setIsDirty] = useState(false);
+    const [showExitDialog, setShowExitDialog] = useState(false);
+    const [pendingNavigation, setPendingNavigation] = useState(null);
+
     const [data, setData] = useState({
         heroImage: "",
         heroTitle: "",
@@ -30,6 +40,40 @@ function IndustryApproachEditor() {
         contentDescription: "",
         features: []
     });
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    const handleBack = () => {
+        if (isDirty) {
+            setPendingNavigation("/about-us");
+            setShowExitDialog(true);
+        } else {
+            navigate("/about-us");
+        }
+    };
+
+    const confirmLeave = () => {
+        if (pendingNavigation) navigate(pendingNavigation);
+    };
+
+    const confirmSaveAndLeave = async () => {
+        await handleSave();
+        if (pendingNavigation) navigate(pendingNavigation);
+    };
+
+    const updateData = (newData) => {
+        setData(newData);
+        setIsDirty(true);
+    };
 
     useEffect(() => {
         if (slug) fetchData();
@@ -40,6 +84,7 @@ function IndustryApproachEditor() {
             const result = await getIndustryApproachPageBySlug(slug);
             if (result.success && result.data) {
                 setData(result.data);
+                setIsDirty(false);
             }
         } catch (error) {
             console.error(error);
@@ -54,6 +99,7 @@ function IndustryApproachEditor() {
         try {
             await updateIndustryApproachPage(slug, data);
             toast({ title: "Success", description: "Page updated successfully" });
+            setIsDirty(false);
         } catch (error) {
             toast({ title: "Error", description: "Failed to save", variant: "destructive" });
         } finally {
@@ -61,30 +107,56 @@ function IndustryApproachEditor() {
         }
     };
 
+    useEffect(() => {
+        if (shouldScroll && featuresRef.current) {
+            featuresRef.current.scrollIntoView({ behavior: "smooth" });
+            setShouldScroll(false);
+        }
+    }, [data.features, shouldScroll]);
+
     const addFeature = () => {
-        setData({
+        updateData({
             ...data,
             features: [...data.features, { title: "", description: "", icon: "Rocket" }]
         });
+        setShouldScroll(true);
     };
 
     const updateFeature = (index, field, value) => {
         const updatedFeatures = [...data.features];
         updatedFeatures[index][field] = value;
-        setData({ ...data, features: updatedFeatures });
+        updateData({ ...data, features: updatedFeatures });
     };
 
     const removeFeature = (index) => {
         const updated = data.features.filter((_, i) => i !== index);
-        setData({ ...data, features: updated });
+        updateData({ ...data, features: updated });
     };
 
     if (loading) return <div className="p-10 flex justify-center"><Loader2 className="animate-spin" /></div>;
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-10">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Edit Industry Approach Page</h1>
+            <UnsavedChangesDialog
+                open={showExitDialog}
+                onOpenChange={setShowExitDialog}
+                onLeave={confirmLeave}
+                onSave={confirmSaveAndLeave}
+            />
+            <div className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm border">
+                <Button variant="ghost" size="icon" onClick={handleBack}>
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div className="flex-1">
+                    <h1 className="text-2xl font-bold">Edit Industry Approach Page</h1>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <span className="hover:underline cursor-pointer" onClick={() => navigate("/dashboard")}>Dashboard</span>
+                        <span>/</span>
+                        <span className="hover:underline cursor-pointer" onClick={handleBack}>About Us</span>
+                        <span>/</span>
+                        <span className="font-medium text-foreground">{slug}</span>
+                    </div>
+                </div>
                 <Button onClick={handleSave} disabled={saving}>
                     {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save Changes
                 </Button>
@@ -95,11 +167,11 @@ function IndustryApproachEditor() {
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label>Hero Title</Label>
-                        <Input value={data.heroTitle} onChange={(e) => setData({ ...data, heroTitle: e.target.value })} />
+                        <Input value={data.heroTitle} onChange={(e) => updateData({ ...data, heroTitle: e.target.value })} />
                     </div>
                     <div className="space-y-2">
                         <Label>Hero Banner Image</Label>
-                        <FileUploader value={data.heroImage || ""} onChange={(url) => setData({ ...data, heroImage: url })} />
+                        <FileUploader value={data.heroImage || ""} onChange={(url) => updateData({ ...data, heroImage: url })} />
                     </div>
                 </CardContent>
             </Card>
@@ -109,11 +181,11 @@ function IndustryApproachEditor() {
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label>Section Title</Label>
-                        <Input value={data.contentTitle} onChange={(e) => setData({ ...data, contentTitle: e.target.value })} />
+                        <Input value={data.contentTitle} onChange={(e) => updateData({ ...data, contentTitle: e.target.value })} />
                     </div>
                     <div className="space-y-2">
                         <Label>Description</Label>
-                        <RichTextEditor value={data.contentDescription} onChange={(val) => setData({ ...data, contentDescription: val })} />
+                        <RichTextEditor value={data.contentDescription} onChange={(val) => updateData({ ...data, contentDescription: val })} />
                     </div>
                 </CardContent>
             </Card>
@@ -126,7 +198,7 @@ function IndustryApproachEditor() {
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 gap-4">
                         {data.features.map((feature, index) => (
-                            <div key={index} className="p-4 border rounded bg-white relative flex gap-4 items-start">
+                            <div key={index} className="p-4 border rounded bg-card relative flex gap-4 items-start">
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -165,6 +237,7 @@ function IndustryApproachEditor() {
                                 </div>
                             </div>
                         ))}
+                        <div ref={featuresRef} />
                     </div>
                     {data.features.length === 0 && <p className="text-center text-muted-foreground py-4">No features added.</p>}
                 </CardContent>

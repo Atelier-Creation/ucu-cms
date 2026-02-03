@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAboutPageData, updateAboutPageData } from "@/Api/AboutApi";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import RichTextEditor from "@/components/RichTextEditor";
 import HighlightableInput from "@/components/HighlightableInput";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 
 export default function AboutPageEditor() {
     const { slug } = useParams();
@@ -25,6 +26,8 @@ export default function AboutPageEditor() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const sectionsEndRef = useRef(null);
+    const [shouldScroll, setShouldScroll] = useState(false);
 
     const [data, setData] = useState({
         title: "",
@@ -56,11 +59,53 @@ export default function AboutPageEditor() {
         }
     };
 
+    const [isDirty, setIsDirty] = useState(false);
+    const [showExitDialog, setShowExitDialog] = useState(false);
+    const [pendingNavigation, setPendingNavigation] = useState(null);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    const handleBack = () => {
+        if (isDirty) {
+            setPendingNavigation("/about-us");
+            setShowExitDialog(true);
+        } else {
+            navigate("/about-us");
+        }
+    };
+
+    const confirmLeave = () => {
+        if (pendingNavigation) {
+            navigate(pendingNavigation);
+        }
+    };
+
+    const confirmSaveAndLeave = async () => {
+        await handleSave();
+        navigate(pendingNavigation || "/about-us");
+    };
+
+    // Helper to wrap onChange updates
+    const updateData = (newData) => {
+        setData(newData);
+        setIsDirty(true);
+    };
+
     const handleSave = async () => {
         setSaving(true);
         try {
             await updateAboutPageData(slug, data);
             toast({ title: "Success", description: "Page saved successfully" });
+            setIsDirty(false);
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to save page", variant: "destructive" });
@@ -69,29 +114,37 @@ export default function AboutPageEditor() {
         }
     };
 
+    useEffect(() => {
+        if (shouldScroll && sectionsEndRef.current) {
+            sectionsEndRef.current.scrollIntoView({ behavior: "smooth" });
+            setShouldScroll(false);
+        }
+    }, [data.sections, shouldScroll]);
+
     const addSection = () => {
-        setData(prev => ({
+        updateData(prev => ({
             ...prev,
             sections: [...(prev.sections || []), { type: "content", heading: "", content: "", image: "" }]
         }));
+        setShouldScroll(true);
     };
 
     const removeSection = (index) => {
-        setData(prev => ({
+        updateData(prev => ({
             ...prev,
             sections: prev.sections.filter((_, i) => i !== index)
         }));
     };
 
     const updateSection = (index, field, value) => {
-        setData(prev => ({
+        updateData(prev => ({
             ...prev,
             sections: prev.sections.map((sec, i) => i === index ? { ...sec, [field]: value } : sec)
         }));
     };
 
     const addGalleryImage = (sectionIndex) => {
-        setData(prev => {
+        updateData(prev => {
             const newSections = [...prev.sections];
             if (!newSections[sectionIndex].gallery) newSections[sectionIndex].gallery = [];
             newSections[sectionIndex].gallery.push("");
@@ -100,7 +153,7 @@ export default function AboutPageEditor() {
     };
 
     const updateGalleryImage = (sectionIndex, imageIndex, url) => {
-        setData(prev => {
+        updateData(prev => {
             const newSections = [...prev.sections];
             newSections[sectionIndex].gallery[imageIndex] = url;
             return { ...prev, sections: newSections };
@@ -108,7 +161,7 @@ export default function AboutPageEditor() {
     };
 
     const removeGalleryImage = (sectionIndex, imageIndex) => {
-        setData(prev => {
+        updateData(prev => {
             const newSections = [...prev.sections];
             newSections[sectionIndex].gallery = newSections[sectionIndex].gallery.filter((_, i) => i !== imageIndex);
             return { ...prev, sections: newSections };
@@ -119,15 +172,27 @@ export default function AboutPageEditor() {
 
     return (
         <div className="space-y-6 pb-20">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => navigate("/about-us")}>
+            <UnsavedChangesDialog
+                open={showExitDialog}
+                onOpenChange={setShowExitDialog}
+                onLeave={confirmLeave}
+                onSave={confirmSaveAndLeave}
+            />
+            <div className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm border">
+                <Button variant="ghost" size="icon" onClick={handleBack}>
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-1">
+                    <h1 className="text-2xl font-bold flex items-center gap-1 text-foreground">
                         Edit Page: <span dangerouslySetInnerHTML={{ __html: data.title || '' }} />
                     </h1>
-                    <p className="text-sm text-muted-foreground">/about/{data.pageSlug}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <span className="hover:underline cursor-pointer" onClick={() => navigate("/dashboard")}>Dashboard</span>
+                        <span>/</span>
+                        <span className="hover:underline cursor-pointer" onClick={handleBack}>About Us</span>
+                        <span>/</span>
+                        <span className="font-medium text-foreground">{slug}</span>
+                    </div>
                 </div>
                 <div className="ml-auto">
                     <Button onClick={handleSave} disabled={saving}>
@@ -142,15 +207,15 @@ export default function AboutPageEditor() {
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label>Page Title (Display)</Label>
-                        <HighlightableInput value={data.title || ""} onChange={(e) => setData({ ...data, title: e.target.value })} />
+                        <HighlightableInput value={data.title || ""} onChange={(e) => updateData(prev => ({ ...prev, title: e.target.value }))} />
                     </div>
                     <div className="space-y-2">
                         <Label>Banner Image</Label>
-                        <FileUploader value={data.bannerImage || ""} onChange={(url) => setData({ ...data, bannerImage: url })} />
+                        <FileUploader value={data.bannerImage || ""} onChange={(url) => updateData(prev => ({ ...prev, bannerImage: url }))} />
                     </div>
                     <div className="space-y-2">
                         <Label>Description / Intro Text</Label>
-                        <Textarea className="min-h-[100px]" value={data.description || ""} onChange={(e) => setData({ ...data, description: e.target.value })} />
+                        <Textarea className="min-h-[100px]" value={data.description || ""} onChange={(e) => updateData(prev => ({ ...prev, description: e.target.value }))} />
                     </div>
                 </CardContent>
             </Card>
@@ -265,7 +330,7 @@ export default function AboutPageEditor() {
 
                             {/* Gallery for Timeline and Brand Logos */}
                             {['timeline', 'brand_logos'].includes(section.type) && (
-                                <div className="space-y-2 border p-4 rounded-md bg-gray-50">
+                                <div className="space-y-2 border p-4 rounded-md bg-muted/30">
                                     <Label className="mb-2 block font-semibold">Gallery Images</Label>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {section.gallery && section.gallery.map((img, imgIdx) => (
@@ -294,6 +359,7 @@ export default function AboutPageEditor() {
                         </CardContent>
                     </Card>
                 ))}
+                <div ref={sectionsEndRef} />
             </div>
         </div>
     );
