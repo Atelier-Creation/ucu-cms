@@ -37,7 +37,8 @@ function CouncilSubmenuPage() {
     const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
     const [targetGroupId, setTargetGroupId] = useState(null);
     const [newItemTitle, setNewItemTitle] = useState("");
-
+    const [newNavTitle, setNewNavTitle] = useState("");
+    const [newNavType, setNewNavType] = useState("group"); // 'group' or 'single'
     useEffect(() => {
         fetchNavigation();
     }, []);
@@ -46,6 +47,7 @@ function CouncilSubmenuPage() {
         setLoading(true);
         try {
             const result = await getAdvisoryNavigation();
+            console.log(result)
             if (result.success) {
                 // If empty, fallback to default or allow empty
                 setNavData(result.data);
@@ -58,6 +60,46 @@ function CouncilSubmenuPage() {
         }
     };
 
+    // Handler
+    const handleCreateNav = async () => {
+        if (!newNavTitle.trim()) return;
+
+        if (newNavType === "group") {
+            // Create Group
+            const payload = {
+                title: newNavTitle.trim(),
+                icon: "User2",
+                sections: [{ header: "Advisory", items: [] }],
+            };
+            try {
+                await createAdvisoryNavigation(payload);
+                toast({ title: "Success", description: "Group created" });
+            } catch (error) {
+                toast({ title: "Error", description: "Failed to create group", variant: "destructive" });
+            }
+        } else {
+            // Create Single
+            const slug = newNavTitle.trim().replace(/\s+/g, "-");
+            const payload = {
+                title: newNavTitle.trim(),
+                icon: "User2",
+                link: `/advisory/${slug}`, // single page link
+                sections: [], // single item has no sections
+            };
+            try {
+                await createAdvisoryNavigation(payload);
+                toast({ title: "Success", description: "Single page created" });
+            } catch (error) {
+                toast({ title: "Error", description: "Failed to create page", variant: "destructive" });
+            }
+        }
+
+        // Reset
+        setNewNavTitle("");
+        setNewNavType("group");
+        setIsGroupDialogOpen(false); // reuse the same dialog
+        fetchNavigation();
+    };
     const handleCreateGroup = async () => {
         if (!newGroupTitle.trim()) return;
         try {
@@ -167,101 +209,155 @@ function CouncilSubmenuPage() {
             )}
 
             {/* Accordion List */}
-            <Accordion
-                type="single"
-                collapsible
-                className="space-y-3"
-            >
-                {navData.map((page, pageIndex) => {
-                    const Icon = iconMap[page.icon] || User2;
-                    return (
-                        <AccordionItem
-                            key={page._id}
-                            value={`page-${page._id}`}
-                            className="border border-border shadow-sm rounded-lg bg-muted/30"
-                        >
-                            <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg group">
-                                <div className="flex items-center gap-2">
-                                    <Icon className="w-5 h-5 text-primary" />
-                                    <span>{page.title}</span>
-                                </div>
-                                {/* Stop propagation to prevent accordion toggle when clicking delete */}
-                                <Button
-                                    size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 text-red-500"
-                                    onClick={(e) => handleDeleteGroup(e, page._id)}
+            {/* Groups Accordion */}
+            {navData.filter(page => page.sections && page.sections.length > 0).length > 0 && (
+                <Accordion type="multiple" className="space-y-2">
+                    {navData
+                        .filter(page => page.sections && page.sections.length > 0)
+                        .map((group) => {
+                            const Icon = iconMap[group.icon] || User2;
+                            return (
+                                <AccordionItem
+                                    key={group._id}
+                                    value={`group-${group._id}`}
+                                    className="border border-border shadow-sm rounded-lg bg-muted/30"
                                 >
-                                    <Trash className="w-4 h-4" />
-                                </Button>
-                            </AccordionTrigger>
+                                    <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg group">
+                                        <div className="flex items-center gap-2">
+                                            <Icon className="w-5 h-5 text-primary" />
+                                            <span>{group.title}</span>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="opacity-0 group-hover:opacity-100 text-red-500"
+                                            onClick={(e) => handleDeleteGroup(e, group._id)}
+                                        >
+                                            <Trash className="w-4 h-4" />
+                                        </Button>
+                                    </AccordionTrigger>
 
-                            <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
-                                <div className="flex justify-end mb-2">
-                                    <Button size="sm" variant="outline" onClick={() => {
-                                        setTargetGroupId(page._id);
-                                        setIsItemDialogOpen(true);
-                                    }}>
-                                        <Plus className="w-3 h-3 mr-1" /> Add Council
-                                    </Button>
-                                </div>
-
-                                {page.sections.map((section, i) => (
-                                    <div key={i} className="pl-4 border-l space-y-2">
-                                        {/* <h4 className="text-xs font-semibold text-muted-foreground uppercase">{section.header}</h4> */}
-                                        {section.items.map((sub, j) => (
-                                            <div
-                                                key={j}
-                                                className="flex items-center justify-between group bg-white p-2 rounded border"
+                                    <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
+                                        <div className="flex justify-end mb-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setTargetGroupId(group._id);
+                                                    setIsItemDialogOpen(true);
+                                                }}
                                             >
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="w-fit text-sm font-normal text-left cursor-pointer"
-                                                    onClick={() => navigate(sub.link)}
+                                                <Plus className="w-3 h-3 mr-1" /> Add Council
+                                            </Button>
+                                        </div>
+                                        {group.sections[0]?.items.length > 0 ? (
+                                            group.sections[0].items.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center justify-between group bg-white p-2 rounded border"
                                                 >
-                                                    {sub.label}
-                                                </Button>
-                                                <div className="flex gap-1 opacity-60 group-hover:opacity-100">
-                                                    <Button variant="ghost" size="sm" onClick={() => navigate(sub.link)}>
-                                                        <Pencil className="w-4 h-4 text-blue-500" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="w-fit text-sm font-normal text-left cursor-pointer"
+                                                        onClick={() => navigate(item.link)}
+                                                    >
+                                                        {item.label}
                                                     </Button>
-                                                    <Button variant="ghost" size="sm" onClick={(e) => handleDeleteItem(e, page._id, j)}>
-                                                        <Trash className="w-4 h-4 text-red-500" />
-                                                    </Button>
+                                                    <div className="flex gap-1 opacity-60 group-hover:opacity-100">
+                                                        <Button variant="ghost" size="sm" onClick={() => navigate(item.link)}>
+                                                            <Pencil className="w-4 h-4 text-blue-500" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={(e) => handleDeleteItem(e, group._id, index)}
+                                                        >
+                                                            <Trash className="w-4 h-4 text-red-500" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                        {section.items.length === 0 && (
+                                            ))
+                                        ) : (
                                             <p className="text-xs text-muted-foreground italic">No councils here yet.</p>
                                         )}
-                                    </div>
-                                ))}
-                            </AccordionContent>
-                        </AccordionItem>
-                    );
-                })}
-            </Accordion>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            );
+                        })}
+                </Accordion>
+            )}
+
+            {/* Single Items Design */}
+            <div className="space-y-2">
+                {navData
+                    .filter(page => !page.sections || page.sections.length === 0)
+                    .map(single => {
+                        const Icon = iconMap[single.icon] || User2;
+                        return (
+                            <div
+                                key={single._id}
+                                className="flex items-center justify-between p-4 border rounded-lg shadow-sm bg-white hover:shadow-md transition"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Icon className="w-5 h-5 text-primary" />
+                                    <span className="font-medium">{single.title}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="ghost" onClick={() => navigate(single.link || "#")}>
+                                        <Pencil className="w-4 h-4 text-blue-500" />
+                                    </Button>
+                                    <Button size="sm" variant="ghost" onClick={(e) => handleDeleteGroup(e, single._id)}>
+                                        <Trash className="w-4 h-4 text-red-500" />
+                                    </Button>
+                                </div>
+                            </div>
+                        );
+                    })}
+            </div>
+
+
 
             {/* Create Group Dialog */}
             <Dialog open={isGroupDialogOpen} onOpenChange={setIsGroupDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add New Advisory Group</DialogTitle>
+                        <DialogTitle>Add New Advisory</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label>Group Title</Label>
+                            <Label>Type</Label>
+                            <select
+                                className="w-full border rounded p-2"
+                                value={newNavType}
+                                onChange={(e) => setNewNavType(e.target.value)}
+                            >
+                                <option value="group">Group</option>
+                                <option value="single">Single Page</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>{newNavType === "group" ? "Group Title" : "Page Title"}</Label>
                             <Input
-                                placeholder="e.g. Technology Advisory Council"
-                                value={newGroupTitle}
-                                onChange={(e) => setNewGroupTitle(e.target.value)}
+                                placeholder={newNavType === "group" ? "e.g. Technology Advisory Council" : "e.g. AI Ethics Council"}
+                                value={newNavTitle}
+                                onChange={(e) => setNewNavTitle(e.target.value)}
                             />
+                            {newNavType === "single" && (
+                                <p className="text-xs text-muted-foreground">
+                                    This will generate a page at /advisory/{newNavTitle.trim().replace(/\s+/g, "-")}
+                                </p>
+                            )}
                         </div>
                     </div>
+
                     <DialogFooter>
-                        <Button onClick={handleCreateGroup}>Create Group</Button>
+                        <Button onClick={handleCreateNav}>Create</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
 
             {/* Create Item Dialog */}
             <Dialog open={isItemDialogOpen} onOpenChange={setIsItemDialogOpen}>
