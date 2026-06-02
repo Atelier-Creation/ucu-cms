@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import OverviewEditor from "@/components/Programcms/OverviewEditor";
+import HighlightsEditor from "@/components/Programcms/HighlightsEditor";
 import CurriculumEditor from "@/components/Programcms/CurriculumEditor";
 import FeeStructureEditor from "@/components/Programcms/FeeStructureEditor";
 import AdmissionsEditor from "@/components/Programcms/AdmissionsEditor";
@@ -89,6 +90,7 @@ console.log(programId,mode);
   const overviewData = programData.tabs?.find(tab => tab.tabName === "Overview");
 const curriculumData = programData.tabs?.find(tab => tab.tabName === "Curriculum");
 const feesData = programData.tabs?.find(tab => tab.tabName === "Fees Structure");
+const highlightsData = programData.highlights || [];
 
 
   return (
@@ -174,7 +176,7 @@ const feesData = programData.tabs?.find(tab => tab.tabName === "Fees Structure")
               >
                 <TabsList
                   className="
-                    flex sm:grid sm:grid-cols-5 
+                    flex sm:grid sm:grid-cols-6 
                     w-max sm:w-[90%] mx-auto sm:mx-10 
                     bg-gray-100 dark:bg-black/0 px-4 sm:px-2 
                     whitespace-nowrap h-12 mb-2 gap-4
@@ -185,6 +187,12 @@ const feesData = programData.tabs?.find(tab => tab.tabName === "Fees Structure")
                     className="cursor-pointer text-sm sm:text-base"
                   >
                     Overview
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="highlights"
+                    className="cursor-pointer text-sm sm:text-base"
+                  >
+                    Highlights
                   </TabsTrigger>
                   <TabsTrigger
                     value="curriculum"
@@ -223,8 +231,15 @@ const feesData = programData.tabs?.find(tab => tab.tabName === "Fees Structure")
                   mode={mode}
                   sections={overviewData?.sections || []}
                   loading={loading}
-                  onNext={() => handleNextTab("curriculum")}
+                  onNext={() => handleNextTab("highlights")}
                   onSave={(data) => handleSectionSave("overview", data)}
+                />
+              </TabsContent>
+
+              <TabsContent value="highlights">
+                <HighlightsEditor
+                  highlights={highlightsData}
+                  onSave={(data) => handleSectionSave("highlights", data)}
                 />
               </TabsContent>
 

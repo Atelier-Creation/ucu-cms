@@ -36,6 +36,8 @@ import OnlineProgramStats from "./pages/OnlineProgram/OnlineProgramStats";
 import OnlineProgramApply from "./pages/OnlineProgram/OnlineProgramApply";
 import OnlineProgramBannerPage from "./pages/OnlineProgram/OnlineProgramBannerPage";
 import OnlineApplyEdit from "./pages/OnlineProgram/OnlineApplyEdit";
+import CertificationApplicationsPage from "./pages/CertificationApplicationsPage";
+import CertificationApplicationEditPage from "./pages/CertificationApplicationEditPage";
 
 function App() {
   return (
@@ -69,6 +71,8 @@ function App() {
                     <Route path="/programs/fulltime" element={<FullTimePrograms />} />
                     <Route path="/program/flexi" element={<FlexiProgram />} />
                     <Route path="/pages/admission" element={<AdmissionPageCMS />} />
+                    <Route path="/certification-applications" element={<CertificationApplicationsPage />} />
+                    <Route path="/certification-applications/edit/:id" element={<CertificationApplicationEditPage />} />
                     <Route path="/online-program" element={<OnlineProgram />} />
                     <Route path="/online-program/stats" element={<OnlineProgramStats />} />
                     <Route path="/online-program/apply" element={<OnlineProgramApply />} />

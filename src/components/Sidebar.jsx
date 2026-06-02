@@ -48,7 +48,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     { to: "/about-us", label: "About Us", icon: Globe },
-    { to: "/students", label: "Students", icon: Users },
+    { to: "/certification-applications", label: "Admissions Applications", icon: Users },
     {
       to: "/Programs",
       label: "Programs",
