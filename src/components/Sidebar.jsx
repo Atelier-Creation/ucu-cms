@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Globe,
   School,
+  FileText,
 } from "lucide-react";
 import {
   Sheet,
@@ -36,6 +37,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
   const links = [
     { to: "/", label: "Dashboard", icon: Home },
+    { to: "/frontend-content", label: "Seeded Content", icon: FileText },
     {
       label: "Pages",
       to: "/pages",
@@ -45,6 +47,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         { to: "/pages/industry", label: "Industry Partnership" },
         { to: "/pages/status", label: "Social Impact" },
         { to: "/pages/admission", label: "Admissions" },
+        { to: "/pages/contact", label: "Contact" },
+        { to: "/pages/faculty", label: "Faculty" },
       ],
     },
     { to: "/about-us", label: "About Us", icon: Globe },
@@ -64,6 +68,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           to: "/programs/Executive-Post-Graduate-Certificate-Programmes",
           label: "Executive Post Graduate Certificate Programmes",
         },
+        { to: "/programs/sales-diploma", label: "Sales Diploma" },
+        { to: "/programs/mdps", label: "MDPs" },
       ],
     },
     { to: "/events", label: "Events", icon: CalendarDays },

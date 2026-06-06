@@ -36,6 +36,11 @@ export const updateAdvisor = async (id, data) => {
     return response.data;
 };
 
+export const reorderAdvisors = async (councilTitleId, orderedIds) => {
+    const response = await axios.put(`${ADVISOR_URL}/reorder`, { councilTitleId, orderedIds });
+    return response.data;
+};
+
 export const deleteAdvisor = async (id) => {
     const response = await axios.delete(`${ADVISOR_URL}/${id}`);
     return response.data;

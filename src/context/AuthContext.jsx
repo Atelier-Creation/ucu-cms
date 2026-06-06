@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
+import cmsApi from "@/lib/cmsApi";
 
 const AuthContext = createContext();
 
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
     const login = async (email, password) => {
         try {
             // Adjust URL if your backend is deployed elsewhere
-            const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+            const { data } = await cmsApi.post("/auth/login", {
                 email,
                 password,
             });

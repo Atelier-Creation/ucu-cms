@@ -74,7 +74,10 @@ export default function FileUploader({
         contentType: item.file.type || "application/octet-stream",
         size: item.file.size,
       };
-      const res = await axios.post(uploadPresignUrl, meta);
+      const token = localStorage.getItem("token");
+      const res = await axios.post(uploadPresignUrl, meta, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       // expected: { uploadUrl, publicUrl, key }
       const { uploadUrl, publicUrl } = res.data;
 

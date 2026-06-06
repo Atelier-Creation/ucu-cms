@@ -38,13 +38,18 @@ export default function FileUploader({
         // 1️⃣ Ask backend for presigned URL
         // Use environment variable for base URL + upload/presign endpoint
         const presignUrl = `${import.meta.env.VITE_API_BASE_URL}/upload/presign`;
+        const token = localStorage.getItem("token");
 
         const res = await fetch(presignUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({
             filename: file.name,
-            contentType: file.type
+            contentType: file.type,
+            size: file.size,
           })
         });
 

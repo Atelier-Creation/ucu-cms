@@ -21,6 +21,145 @@ import { PanelsTopLeft } from "lucide-react";
 import { useLocation, Link, useParams } from "react-router-dom";
 import { createProgram, getProgramById, updateProgram } from "@/Api/programApi";
 
+const salesDiplomaTemplate = {
+  programImage: "https://img.freepik.com/premium-photo/diverse-group-students-holding-books-front-globe-symbolizing-global-education_638974-7905.jpg",
+  image: "https://img.freepik.com/premium-photo/diverse-group-students-holding-books-front-globe-symbolizing-global-education_638974-7905.jpg",
+  programTitle: "New Diploma Program",
+  subTitle: "Industry-integrated diploma for early career professionals",
+  infoBoxesdata: [
+    {
+      applicationOpen: "Applications Open",
+      duration: "6 Months",
+      eligibility: "Fresh graduates and professionals with 0-3 years experience",
+      downloadBrochure: "/contact-us",
+    },
+  ],
+  tabs: [
+    {
+      tabName: "Overview",
+      sections: [
+        {
+          title: "About UCU Diploma Programs",
+          contentType: "text",
+          contentData: "UCU's Diploma Programs are designed to fast-track careers by equipping learners with sharp, industry-ready skills that deliver immediate impact.",
+        },
+        {
+          title: "Who is this Program For?",
+          contentType: "list",
+          contentData: [
+            "High potential freshers",
+            "Professionals with 0-3 years of post-UG work experience",
+            "Learners seeking a role-focused alternative to a full-time MBA",
+          ],
+        },
+      ],
+    },
+    {
+      tabName: "Curriculum",
+      sections: [
+        {
+          title: "Learning Roadmap",
+          contentType: "list",
+          contentData: ["Admission and onboarding", "Core functional training", "Industry projects", "Career readiness"],
+        },
+      ],
+    },
+    {
+      tabName: "Fees Structure",
+      sections: [
+        {
+          title: "Program Fees",
+          contentType: "text",
+          contentData: "Update fee details from CMS.",
+        },
+      ],
+    },
+  ],
+  highlights: [
+    {
+      id: "career-launchpad",
+      label: "Career Launchpad",
+      iconName: "Target",
+      title: "Role-Focused Learning",
+      text: "Built around practical capabilities and career outcomes.",
+    },
+    {
+      id: "corporate-connect",
+      label: "Corporate Connect",
+      iconName: "Building2",
+      title: "Industry Integrated",
+      text: "Designed to be co-created and co-delivered with corporate partners.",
+    },
+  ],
+  admissions: {
+    heading: "Admissions Process",
+    description:
+      "Manage and update the admissions details for this diploma, including eligibility, process steps, and key dates.",
+    eligibility: [
+      "Fresh graduates and early-career professionals",
+      "Bachelor's degree from a recognised university",
+      "Interest in role-focused career acceleration",
+    ],
+    processSteps: [
+      "Apply online through the official application form",
+      "Attend the interview with the admissions panel",
+      "Complete profile evaluation and selection formalities",
+      "Submit fees and confirm enrolment",
+    ],
+    importantDates: [
+      { label: "Applications Open", value: "Update from CMS" },
+      { label: "Interview Window", value: "Update from CMS" },
+      { label: "Program Commencement", value: "Update from CMS" },
+    ],
+  },
+  placement: {
+    main: {
+      heading: "Career and Placement Support",
+      description:
+        "UCU supports diploma learners with role readiness, recruiter engagement, interview preparation, and career guidance.",
+    },
+    internship: {
+      title: "Internship Placement Process",
+      content: [
+        "Update internship placement details from CMS.",
+      ],
+      timeline: [
+        { label: "Batch", value: "Update from CMS" },
+        { label: "Hiring Window", value: "Update from CMS" },
+      ],
+    },
+    finalPlacement: {
+      title: "Final Placement Process",
+      content: [
+        "Update final placement details from CMS.",
+      ],
+      timeline: [
+        { label: "Batch", value: "Update from CMS" },
+        { label: "Final Placement Window", value: "Update from CMS" },
+      ],
+    },
+    careerServices: [
+      {
+        head: "Career Readiness",
+        image: "",
+        para: "Update career services details from CMS.",
+      },
+    ],
+    highlights: [
+      { number: "0", para: "Update placement highlight" },
+    ],
+    recruiters: ["Update recruiter names from CMS"],
+    contact: [
+      {
+        name: "Career Services",
+        role: "Placement Support",
+        email: "admissions@ucu.edu",
+        phone: "",
+      },
+    ],
+  },
+};
+
 export default function ProgramEditor({
   mode = "create", // "create" | "edit"
   initialData = null,
@@ -28,8 +167,10 @@ export default function ProgramEditor({
   onCancel,
 }) {
   const [activeTab, setActiveTab] = useState("overview");
-  const [programData, setProgramData] = useState(initialData || {});
   const location = useLocation();
+  const isExecutiveCreate =
+    mode === "create" && location.pathname.includes("Executive-Post-Graduate-Certificate-Programmes");
+  const [programData, setProgramData] = useState(initialData || (isExecutiveCreate ? salesDiplomaTemplate : {}));
   const [loading, setLoading] = useState(false);
   const { id: paramId } = useParams();
   const programId  = location.state?.programId || paramId;
@@ -66,20 +207,52 @@ console.log(programId,mode);
 
   const handleNextTab = (next) => setActiveTab(next);
 
+  const upsertTab = (tabs = [], tabName, sections) => {
+    const nextTabs = [...tabs];
+    const index = nextTabs.findIndex((tab) => tab.tabName === tabName);
+    const nextTab = { tabName, sections };
+    if (index >= 0) nextTabs[index] = nextTab;
+    else nextTabs.push(nextTab);
+    return nextTabs;
+  };
+
   const handleSectionSave = (section, data) => {
     setProgramData((prev) => ({
       ...prev,
-      [section]: data,
+      ...(section === "header" ? { ...data, image: data.programImage || data.image || prev.image } : {}),
+      ...(section === "overview" ? { tabs: upsertTab(prev.tabs, "Overview", data) } : {}),
+      ...(section === "curriculum" ? { tabs: upsertTab(prev.tabs, "Curriculum", data) } : {}),
+      ...(section === "fees" ? { tabs: upsertTab(prev.tabs, "Fees Structure", data) } : {}),
+      ...(section === "highlights" ? { highlights: data } : {}),
+      ...(section === "admissions" ? { admissions: data } : {}),
+      ...(section === "placement" ? { placement: data } : {}),
     }));
+  };
+
+  const normalizeProgramData = (data) => {
+    const fallback = isExecutiveCreate ? salesDiplomaTemplate : {};
+    return {
+      ...fallback,
+      ...data,
+      image: data.image || data.programImage || fallback.image || "",
+      programImage: data.programImage || data.image || fallback.programImage || "",
+      programTitle: data.programTitle || fallback.programTitle || "New Program",
+      subTitle: data.subTitle || fallback.subTitle || "Program subtitle",
+      infoBoxesdata: data.infoBoxesdata?.length ? data.infoBoxesdata : fallback.infoBoxesdata,
+      tabs: data.tabs?.length ? data.tabs : fallback.tabs,
+      highlights: data.highlights?.length ? data.highlights : fallback.highlights,
+      admissions: data.admissions || fallback.admissions,
+      placement: data.placement || fallback.placement,
+    };
   };
 
   const handleSubmit = async () => {
     try {
       if (mode === "edit") {
-        await updateProgram(programId, programData);
+        await updateProgram(programId, normalizeProgramData(programData));
         alert("Program updated successfully ✅");
       } else {
-        await createProgram(programData);
+        await createProgram(normalizeProgramData(programData));
         alert("Program created successfully ✅");
       }
     } catch (error) {

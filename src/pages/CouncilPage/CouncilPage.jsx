@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { PanelsTopLeft, Plus, Pencil, Trash2, Save, Loader2 } from "lucide-react";
+import { PanelsTopLeft, Plus, Pencil, Trash2, Save, Loader2, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,8 @@ import {
   updateCouncilCategory,
   createAdvisor,
   updateAdvisor,
-  deleteAdvisor
+  deleteAdvisor,
+  reorderAdvisors
 } from "../../Api/CouncilApi";
 
 function CouncilPage() {
@@ -49,6 +50,8 @@ function CouncilPage() {
   const [advisors, setAdvisors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingCategory, setSavingCategory] = useState(false);
+  const [draggedAdvisorId, setDraggedAdvisorId] = useState(null);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   // Advisor Dialog State
   const [isAdvisorDialogOpen, setIsAdvisorDialogOpen] = useState(false);
@@ -94,7 +97,7 @@ function CouncilPage() {
       const result = await getCouncilByTitle(title);
       if (result && result.data) {
         setCategory(result.data.category);
-        setAdvisors(result.data.adivsories || []);
+        setAdvisors(sortAdvisors(result.data.adivsories || []));
         // Update display title to match DB
         if (result.data.category.councilTitle) {
           setCouncilTitle(result.data.category.councilTitle);
@@ -116,6 +119,14 @@ function CouncilPage() {
       setLoading(false);
     }
   };
+
+  const sortAdvisors = (items) =>
+    [...items].sort((a, b) => {
+      const aOrder = Number.isFinite(a.sortOrder) ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+      const bOrder = Number.isFinite(b.sortOrder) ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return String(a._id || "").localeCompare(String(b._id || ""));
+    });
 
   const handleSaveCategory = async () => {
     setSavingCategory(true);
@@ -178,7 +189,7 @@ function CouncilPage() {
     }
     setSavingAdvisor(true);
     try {
-      const payload = { ...advisorForm, councilTitleId: category._id };
+      const payload = { ...advisorForm, councilTitleId: category._id, sortOrder: currentAdvisor?.sortOrder ?? advisors.length };
 
       if (currentAdvisor) {
         await updateAdvisor(currentAdvisor._id, payload);
@@ -207,6 +218,56 @@ function CouncilPage() {
       console.error(error);
       toast({ title: "Error", description: "Failed to delete advisor", variant: "destructive" });
     }
+  };
+
+  const saveAdvisorOrder = async (orderedAdvisors) => {
+    if (!category._id) return;
+    setSavingOrder(true);
+    try {
+      const result = await reorderAdvisors(category._id, orderedAdvisors.map((advisor) => advisor._id));
+      setAdvisors(sortAdvisors(result.data || orderedAdvisors));
+      toast({ title: "Success", description: "Advisor sequence updated" });
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error", description: "Failed to save advisor sequence", variant: "destructive" });
+      fetchData(councilTitle);
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
+  const moveAdvisor = (advisorId, direction) => {
+    const currentIndex = advisors.findIndex((advisor) => advisor._id === advisorId);
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= advisors.length) return;
+
+    const nextAdvisors = [...advisors];
+    const [movedAdvisor] = nextAdvisors.splice(currentIndex, 1);
+    nextAdvisors.splice(targetIndex, 0, movedAdvisor);
+    setAdvisors(nextAdvisors.map((advisor, index) => ({ ...advisor, sortOrder: index })));
+    saveAdvisorOrder(nextAdvisors);
+  };
+
+  const handleAdvisorDrop = (targetAdvisorId) => {
+    if (!draggedAdvisorId || draggedAdvisorId === targetAdvisorId) {
+      setDraggedAdvisorId(null);
+      return;
+    }
+
+    const fromIndex = advisors.findIndex((advisor) => advisor._id === draggedAdvisorId);
+    const toIndex = advisors.findIndex((advisor) => advisor._id === targetAdvisorId);
+    if (fromIndex < 0 || toIndex < 0) {
+      setDraggedAdvisorId(null);
+      return;
+    }
+
+    const nextAdvisors = [...advisors];
+    const [movedAdvisor] = nextAdvisors.splice(fromIndex, 1);
+    nextAdvisors.splice(toIndex, 0, movedAdvisor);
+    setDraggedAdvisorId(null);
+    setAdvisors(nextAdvisors.map((advisor, index) => ({ ...advisor, sortOrder: index })));
+    saveAdvisorOrder(nextAdvisors);
   };
 
   if (loading) return <div className="p-10 flex justify-center"><Loader2 className="animate-spin" /></div>;
@@ -256,10 +317,17 @@ function CouncilPage() {
 
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">{councilTitle}</h1>
-        <Button onClick={handleSaveCategory} disabled={savingCategory}>
-          {savingCategory ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Save Page Details
-        </Button>
+        <div className="flex items-center gap-2">
+          {savingOrder && (
+            <span className="text-sm text-muted-foreground flex items-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving sequence
+            </span>
+          )}
+          <Button onClick={handleSaveCategory} disabled={savingCategory}>
+            {savingCategory ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Save Page Details
+          </Button>
+        </div>
       </div>
 
       {/* Category Banner & Content */}
@@ -287,7 +355,12 @@ function CouncilPage() {
       {/* Advisors List */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Advisors</CardTitle>
+          <div>
+            <CardTitle>Advisors</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Drag advisor cards or use the arrow buttons to sequence people on the website.
+            </p>
+          </div>
           <Button onClick={openAddAdvisor} disabled={!category._id}>
             <Plus className="mr-2 h-4 w-4" /> Add Advisor
           </Button>
@@ -296,9 +369,40 @@ function CouncilPage() {
           {!category._id && <div className="text-muted-foreground text-sm">Please save the category first to add advisors.</div>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {advisors.map((advisor) => (
-              <Card key={advisor._id} className="relative overflow-hidden group">
+            {advisors.map((advisor, index) => (
+              <Card
+                key={advisor._id}
+                draggable={!savingOrder}
+                onDragStart={() => setDraggedAdvisorId(advisor._id)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => handleAdvisorDrop(advisor._id)}
+                onDragEnd={() => setDraggedAdvisorId(null)}
+                className={`relative overflow-hidden group cursor-grab active:cursor-grabbing ${draggedAdvisorId === advisor._id ? "opacity-50 ring-2 ring-primary" : ""}`}
+              >
+                <div className="absolute top-2 left-2 z-10 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+                  #{index + 1}
+                </div>
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 p-1 rounded-md">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={index === 0 || savingOrder}
+                    onClick={() => moveAdvisor(advisor._id, "up")}
+                    title="Move up"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={index === advisors.length - 1 || savingOrder}
+                    onClick={() => moveAdvisor(advisor._id, "down")}
+                    title="Move down"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-blue-600" onClick={() => openEditAdvisor(advisor)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -306,7 +410,10 @@ function CouncilPage() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="p-4 flex gap-4 items-start">
+                <div className="p-4 pt-10 flex gap-4 items-start">
+                  <div className="flex h-16 w-8 shrink-0 items-center justify-center rounded-md border border-dashed text-muted-foreground">
+                    <GripVertical className="h-5 w-5" />
+                  </div>
                   <img
                     src={advisor.profileImageUrl || "https://via.placeholder.com/100"}
                     alt={advisor.name}

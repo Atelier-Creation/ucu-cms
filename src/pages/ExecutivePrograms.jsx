@@ -67,7 +67,7 @@ function ExecutivePrograms() {
            Executive Post Graduate Certificate Programmes
         </h1>
         <div className="ml-2 text-right">
-          <Button onClick={() => navigate('/program/fulltime/create')}>Add Program</Button>
+          <Button onClick={() => navigate('/programs/Executive-Post-Graduate-Certificate-Programmes/create')}>Add Program</Button>
         </div>
       </div>
       <Accordion

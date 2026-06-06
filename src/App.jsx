@@ -38,6 +38,12 @@ import OnlineProgramBannerPage from "./pages/OnlineProgram/OnlineProgramBannerPa
 import OnlineApplyEdit from "./pages/OnlineProgram/OnlineApplyEdit";
 import CertificationApplicationsPage from "./pages/CertificationApplicationsPage";
 import CertificationApplicationEditPage from "./pages/CertificationApplicationEditPage";
+import ContactPageCMS from "./pages/ContactPageCMS";
+import MDPsPage from "./pages/MDPsPage";
+import FacultyBucketsPage from "./pages/FacultyBucketsPage";
+import SalesDiplomaPageCMS from "./pages/SalesDiplomaPageCMS";
+import FrontendContentList from "./pages/FrontendContentList";
+import FrontendContentEditor from "./pages/FrontendContentEditor";
 
 function App() {
   return (
@@ -55,6 +61,8 @@ function App() {
                 <AdminLayout>
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
+                    <Route path="/frontend-content" element={<FrontendContentList />} />
+                    <Route path="/frontend-content/:pageKey" element={<FrontendContentEditor />} />
                     <Route path="/pages/home/none" element={<AllPageView />} />
                     <Route path="/pages/home" element={<HomePageSections />} />
                     <Route path="/pages/home/slider" element={<HeroSlidesPage />} />
@@ -71,6 +79,8 @@ function App() {
                     <Route path="/programs/fulltime" element={<FullTimePrograms />} />
                     <Route path="/program/flexi" element={<FlexiProgram />} />
                     <Route path="/pages/admission" element={<AdmissionPageCMS />} />
+                    <Route path="/pages/contact" element={<ContactPageCMS />} />
+                    <Route path="/pages/faculty" element={<FacultyBucketsPage />} />
                     <Route path="/certification-applications" element={<CertificationApplicationsPage />} />
                     <Route path="/certification-applications/edit/:id" element={<CertificationApplicationEditPage />} />
                     <Route path="/online-program" element={<OnlineProgram />} />
@@ -80,6 +90,8 @@ function App() {
                     <Route path="/online-program/edit/:stepId" element={<OnlineApplyEdit />} />
                     <Route path="/programs/Career-Reboot-Program-for-Women" element={<CrpfwProgram />} />
                     <Route path="/programs/Executive-Post-Graduate-Certificate-Programmes" element={<ExecutivePrograms />} />
+                    <Route path="/programs/sales-diploma" element={<SalesDiplomaPageCMS />} />
+                    <Route path="/programs/mdps" element={<MDPsPage />} />
                     <Route path="/advisory-councils/*" element={<CouncilPage />} />
                     <Route path="/advisory-councils" element={<CouncilSubmenuPage />} />
 
