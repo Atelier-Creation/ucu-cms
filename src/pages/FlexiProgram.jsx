@@ -21,30 +21,44 @@ import {
     RadioGroupItem,
 } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { getAllPrograms } from "@/Api/programApi";
 
 const iconMap = { Home, Mic, GraduationCap };
 
-const fullTimeProgramsData = [
-    {
-        icon: "GraduationCap",
-        pageTitle: "Flexi Programs",
-        sections: [
-            {
-                header: "Programs",
-                submenu: [
+function slugify(text) {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
+}
 
-                    { label: "PGPM Flex", link: "/program/flexi/pgpm-flex/1" },
-                    { label: "PGXPM", link: "/program/flexi/pgxpm/2" },
-                ],
-            },
-        ],
-    },
-];
+function isFlexiProgram(program) {
+    if (program.programCategory === "flexi") return true;
+    const text = `${program.programTitle || ""} ${program.subTitle || ""}`.toLowerCase();
+    return text.includes("flex") || text.includes("pgxpm") || text.includes("executive leadership");
+}
 
 function FlexiProgram() {
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
     const [selectedType, setSelectedType] = React.useState("fulltime");
+    const [programs, setPrograms] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchPrograms = async () => {
+            try {
+                const data = await getAllPrograms();
+                setPrograms((Array.isArray(data) ? data : []).filter(isFlexiProgram));
+            } catch (error) {
+                console.error("Error fetching flexi programs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPrograms();
+    }, []);
 
     return (
         <div className="space-y-4">
@@ -103,7 +117,7 @@ function FlexiProgram() {
                                         if (selectedType === "fulltime") {
                                             navigate("/program/fulltime/create");
                                         } else {
-                                            navigate("/program/fulltime/create");
+                                            navigate("/program/flex/create");
                                         }
                                     }}
                                 >
@@ -122,88 +136,45 @@ function FlexiProgram() {
                 className="space-y-3"
                 defaultValue="page-0"
             >
-                {fullTimeProgramsData.map((page, pageIndex) => {
-                    const Icon = iconMap[page.icon];
-                    return (
-                        <AccordionItem
-                            key={pageIndex}
-                            value={`page-${pageIndex}`}
-                            className="border border-border shadow-sm rounded-lg bg-muted/30"
-                        >
-                            <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg">
-                                <div className="flex items-center gap-2">
-                                    {Icon && <Icon className="w-5 h-5 text-primary" />}
-                                    <span>{page.pageTitle}</span>
-                                </div>
-                            </AccordionTrigger>
+                <AccordionItem
+                    value="page-0"
+                    className="border border-border shadow-sm rounded-lg bg-muted/30"
+                >
+                    <AccordionTrigger className="flex justify-between items-center px-5 py-3 font-medium bg-muted/50 hover:bg-muted transition cursor-pointer rounded-t-lg">
+                        <div className="flex items-center gap-2">
+                            <GraduationCap className="w-5 h-5 text-primary" />
+                            <span>Flexi Programs</span>
+                        </div>
+                    </AccordionTrigger>
 
-                            <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
-                                {page.sections.map((section, i) => (
-                                    <Accordion
-                                        key={i}
-                                        type="single"
-                                        collapsible
-                                        className="border-l pl-4 space-y-2"
+                    <AccordionContent className="bg-gray-50 p-4 space-y-3 dark:bg-black">
+                        {loading && <div className="text-sm text-muted-foreground">Loading programs...</div>}
+                        {!loading && programs.length === 0 && (
+                            <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                No Flexi programs are available in the database yet.
+                            </div>
+                        )}
+                        {programs.map((program) => {
+                            const link = `/program/flexi/${slugify(program.programTitle)}/${program._id}`;
+                            return (
+                                <div key={program._id} className="flex items-center justify-between group">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-fit text-sm font-normal text-left cursor-pointer"
+                                        onClick={() => navigate(link, { state: { programId: program._id } })}
                                     >
-                                        {section.submenu.map((sub, j) =>
-                                            sub.submenu ? (
-                                                <AccordionItem
-                                                    key={j}
-                                                    value={`sub-${j}`}
-                                                    className="border-l bg-background rounded-sm border-border pl-3 pr-3"
-                                                >
-                                                    <AccordionTrigger className="text-sm font-medium text-left hover:text-primary flex justify-between items-center cursor-pointer">
-                                                        <span>{sub.label}</span>
-                                                    </AccordionTrigger>
-
-                                                    <AccordionContent className="flex flex-col gap-2">
-                                                        {sub.submenu.map((nested, k) => (
-                                                            <div
-                                                                key={k}
-                                                                className="flex items-center justify-between group"
-                                                            >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="w-fit text-sm font-normal text-left cursor-pointer"
-                                                                    onClick={() => navigate(nested.link)}
-                                                                >
-                                                                    {nested.label}
-                                                                </Button>
-                                                                <Pencil
-                                                                    className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
-                                                                    onClick={() => navigate(nested.link)}
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            ) : (
-                                                <div
-                                                    key={j}
-                                                    className="flex items-center justify-between group"
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="w-fit text-sm font-normal text-left cursor-pointer"
-                                                        onClick={() => navigate(sub.link)}
-                                                    >
-                                                        {sub.label}
-                                                    </Button>
-                                                    <Pencil
-                                                        className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
-                                                        onClick={() => navigate(sub.link)}
-                                                    />
-                                                </div>
-                                            )
-                                        )}
-                                    </Accordion>
-                                ))}
-                            </AccordionContent>
-                        </AccordionItem>
-                    );
-                })}
+                                        {program.programTitle}
+                                    </Button>
+                                    <Pencil
+                                        className="w-4 h-4 text-muted-foreground hover:text-primary cursor-pointer opacity-80 group-hover:opacity-100"
+                                        onClick={() => navigate(link, { state: { programId: program._id } })}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </AccordionContent>
+                </AccordionItem>
             </Accordion>
         </div>
     );
